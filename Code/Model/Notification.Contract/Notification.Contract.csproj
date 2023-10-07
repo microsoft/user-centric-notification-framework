@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.1.0</Version>
+    <Company>Microsoft</Company>
+    <Authors>chrath;niravk</Authors>
+    <PackageId>Microsoft.CFS.Notification.Contract</PackageId>
+    <Product>Microsoft.CFS.Notification.Contract</Product>
+    <Copyright>Copyright ©2023 Microsoft Corporation</Copyright>
+    <Description>This package provides a common set of properties for a Notification Entity object which can be used to trigger various types of Notifications (like Emails, Web /Device Push Notifications, Text etc.)</Description>
+    <RepositoryUrl>https://dev.azure.com/MicrosoftIT/OneITVSO/_git/CFS-MODPRU-UCNF-NotificationEngine</RepositoryUrl>
+    <PackageTags>Notification Contract</PackageTags>
+    <PackageReleaseNotes>Notification Contract - v1.1.0</PackageReleaseNotes>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.Data.Tables" Version="12.8.1" />
+    <PackageReference Include="NCrontab.Signed" Version="3.3.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="7.0.0" />
+  </ItemGroup>
+</Project>

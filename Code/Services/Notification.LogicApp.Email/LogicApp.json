@@ -1,0 +1,974 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workflows_EmailNotification_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "metadata": {
+        "description": "Name of the Logic App."
+      }
+    },
+    "resource_location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "allowedValues": [
+        "[resourceGroup().location]",
+        "australiaeast",
+        "australiasoutheast",
+        "brazilsouth",
+        "centralus",
+        "eastasia",
+        "eastus",
+        "eastus2",
+        "japaneast",
+        "japanwest",
+        "northcentralus",
+        "northeurope",
+        "southcentralus",
+        "southeastasia",
+        "westeurope",
+        "westus"
+      ],
+      "metadata": {
+        "description": "Location of the Logic App."
+      }
+    },
+    "resource_location_code": {
+      "defaultValue": "[tolower(replace(replace(resourceGroup().location,')', ''),'(',''))]",
+      "type": "String",
+      "metadata": {
+        "description": "Location/code to deploy the Azure Resources (e.g. Central US/centralus. Powershell Command: Get-AzureRmLocation |Format-Table)"
+      }
+    },
+    "resource_name_prefix": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Prefix which will be added at the beginning of each resource name"
+      }
+    },
+    "resource_env_suffix": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Env specific suffix which will be added to each resource name"
+      }
+    },
+    "subscription_id": {
+      "defaultValue": "[subscription().subscriptionId]",
+      "type": "String"
+    },
+    "active_directory_client_id": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "keyvault_client_secret_Name": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "azuretables_name": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "active_directory_resource": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "active_directory_tenant_id": {
+      "defaultValue": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "type": "String"
+    },
+    "connections_azuretables_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'Storage'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "connections_office365_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'Office365'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "connections_keyvault_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'KeyVault'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "functionapp_notificationcommonservices_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'NotificationCommonServices'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "functionapp_notificationcommonservices_secret": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "send_as_email": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "email_whitelist": {
+      "defaultValue": "",
+      "type": "array"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "name": "[parameters('workflows_EmailNotification_name')]",
+      "location": "[parameters('resource_location')]",
+      "type": "Microsoft.Logic/workflows",
+      "tags": {
+        "displayName": "LogicApp"
+      },
+      "apiVersion": "2016-06-01",
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "actions": {
+            "Initialize_variable_-_Email_Whitelist": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "EmailWhiteList",
+                    "type": "array",
+                    "value": "[parameters('email_whitelist')]"
+                  }
+                ]
+              },
+              "runAfter": {},
+              "type": "InitializeVariable"
+            },
+            "Initialize_variable_-_Email_Template": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "TemplateContent",
+                    "type": "object"
+                  }
+                ]
+              },
+              "runAfter": {
+                "Initialize_variable_-_Email_Whitelist": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "Initialize_variable_-_Email_Body": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "EmailBody",
+                    "type": "string"
+                  }
+                ]
+              },
+              "runAfter": {
+                "Initialize_variable_-_Email_Template": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "Condition_-_Is_Whitelisting_Enabled": {
+              "actions": {
+                "Condition": {
+                  "actions": {
+                    "Terminate": {
+                      "inputs": {
+                        "runStatus": "Succeeded"
+                      },
+                      "runAfter": {},
+                      "type": "Terminate"
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "not": {
+                          "contains": [
+                            "@variables('EmailWhiteList')",
+                            "@triggerBody()?['to']"
+                          ]
+                        }
+                      }
+                    ]
+                  },
+                  "runAfter": {},
+                  "type": "If"
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "greater": [
+                      "@length(variables('EmailWhiteList'))",
+                      0
+                    ]
+                  }
+                ]
+              },
+              "runAfter": {
+                "Insert_or_Merge_EmailNotificationStatus": [
+                  "Succeeded"
+                ]
+              },
+              "type": "If"
+            },
+            "Condition_-_Is_Email_Template_Present": {
+              "actions": {
+                "Get_Email_Notification_Template": {
+                  "description": "Retrieve Email Notification Template from Table Storage",
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azuretables']['connectionId']"
+                      }
+                    },
+                    "method": "get",
+                    "path": "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent(parameters('azuretables_name')))}/tables/@{encodeURIComponent('ApprovalEmailNotificationTemplates')}/entities(PartitionKey='@{encodeURIComponent(triggerBody()?['tenantIdentifier'])}',RowKey='@{encodeURIComponent(triggerBody()?['templateId'])}')",
+                    "queries": {
+                      "$select": "TemplateContent"
+                    }
+                  },
+                  "runAfter": {},
+                  "type": "ApiConnection"
+                },
+                "Parse_Email_Template_Content": {
+                  "inputs": {
+                    "content": "@body('Get_Email_Notification_Template')",
+                    "schema": {
+                      "properties": {
+                        "TemplateContent": {
+                          "type": "string"
+                        },
+                        "odata.etag": {
+                          "type": "string"
+                        },
+                        "odata.metadata": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "runAfter": {
+                    "Set_Variable_-_Email_Template": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ParseJson"
+                },
+                "Get_secret": {
+                  "inputs": {
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['keyvault']['connectionId']"
+                      }
+                    },
+                    "method": "get",
+                    "path": "/secrets/@{encodeURIComponent(parameters('keyvault_client_secret_Name'))}/value"
+                  },
+                  "runAfter": {
+                    "Parse_Email_Template_Content": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ApiConnection"
+                },
+                "Replace_placeholder_with_data": {
+                  "inputs": {
+                    "authentication": {
+                      "audience": "[parameters('active_directory_resource')]",
+                      "clientId": "[parameters('active_directory_client_id')]",
+                      "secret": "@body('Get_secret')?['value']",
+                      "tenant": "[parameters('active_directory_tenant_id')]",
+                      "type": "ActiveDirectoryOAuth"
+                    },
+                    "body": "@addProperty(triggerBody(),'templateContent',body('Parse_Email_Template_Content')?['TemplateContent'])",
+                    "method": "POST",
+                    "queries": {
+                      "code": "[parameters('functionapp_notificationcommonservices_secret')]"
+                    },
+                    "uri": "[concat('https://', parameters('functionapp_notificationcommonservices_name'), '.azurewebsites.net/api/notificationdatamapper')]"
+                  },
+                  "runAfter": {
+                    "Get_secret": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Http"
+                },
+                "Set_Variable_-_Email_Template": {
+                  "inputs": {
+                    "name": "TemplateContent",
+                    "value": "@body('Get_Email_Notification_Template')"
+                  },
+                  "runAfter": {
+                    "Get_Email_Notification_Template": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable"
+                },
+                "Set_variable_-_Email_Body_(from_template)": {
+                  "inputs": {
+                    "name": "EmailBody",
+                    "value": "@{body('Replace_placeholder_with_data')}"
+                  },
+                  "runAfter": {
+                    "Replace_placeholder_with_data": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable"
+                }
+              },
+              "else": {
+                "actions": {
+                  "Set_variable_-_Email_Body": {
+                    "inputs": {
+                      "name": "EmailBody",
+                      "value": "@triggerBody()?['body']"
+                    },
+                    "runAfter": {},
+                    "type": "SetVariable"
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "not": {
+                      "equals": [
+                        "@triggerBody()?['templateId']",
+                        null
+                      ]
+                    }
+                  }
+                ]
+              },
+              "runAfter": {
+                "Condition_-_Is_Whitelisting_Enabled": [
+                  "Succeeded"
+                ]
+              },
+              "type": "If"
+            },
+            "Condition_-_Are_Attachments_Present": {
+              "actions": {
+                "Create_Attachment_Object": {
+                  "inputs": {
+                    "from": "@body('Parse_Attachment_Content')",
+                    "select": {
+                      "ContentBytes": "@item()['fileBase64']",
+                      "Name": "@item()['fileName']"
+                    }
+                  },
+                  "runAfter": {
+                    "Parse_Attachment_Content": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Select"
+                },
+                "Parse_Attachment_Content": {
+                  "inputs": {
+                    "content": "@triggerBody()?['attachments']",
+                    "schema": {
+                      "items": {
+                        "properties": {
+                          "fileBase64": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          },
+                          "fileUrl": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "fileName",
+                          "fileBase64",
+                          "fileUrl"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "runAfter": {},
+                  "type": "ParseJson"
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "not": {
+                      "equals": [
+                        "@triggerBody()?['attachments']",
+                        null
+                      ]
+                    }
+                  }
+                ]
+              },
+              "runAfter": {
+                "Condition_-_Is_Email_Template_Present": [
+                  "Succeeded"
+                ]
+              },
+              "type": "If"
+            },
+            "Initialize_And_Set_Max_Email_Account_Count_Configured": {
+              "description": "Update here: with the number of email accounts configured in the logic app",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "EmailAccountCount",
+                    "type": "integer",
+                    "value": 2
+                  }
+                ]
+              },
+              "runAfter": {
+                "Condition_-_Are_Attachments_Present": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "Initializes_and_Randomly_Select_Email_Account_to_Use": {
+              "description": "Randomly selecting a number within the max count",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "SelectedAccountNumber",
+                    "type": "integer",
+                    "value": "@mod(ticks(utcNow()),variables('EmailAccountCount'))"
+                  }
+                ]
+              },
+              "runAfter": {
+                "Initialize_And_Set_Max_Email_Account_Count_Configured": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "Initialize_and_Set_Selected_Email_Account_to_Send_Email": {
+              "description": "Updating the current iteration number with the selected account number",
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "CurrentIterationNumber",
+                    "type": "integer",
+                    "value": "@variables('SelectedAccountNumber')"
+                  }
+                ]
+              },
+              "runAfter": {
+                "Initializes_and_Randomly_Select_Email_Account_to_Use": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "Initialize_and_Set_User_Selected_Default_Email_Account": {
+              "inputs": {
+                "variables": [
+                  {
+                    "name": "UserSelectedDefaultEmailAccount",
+                    "type": "integer",
+                    "value": "@int(coalesce(triggerBody()?['emailAccountNumberToUse'],'-1'))"
+                  }
+                ]
+              },
+              "runAfter": {
+                "Initialize_and_Set_Selected_Email_Account_to_Send_Email": [
+                  "Succeeded"
+                ]
+              },
+              "type": "InitializeVariable"
+            },
+            "Insert_or_Merge_EmailNotificationStatus": {
+              "inputs": {
+                "body": {
+                  "RunId": "@workflow()['run']['name']",
+                  "Status": "Sending"
+                },
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuretables']['connectionId']"
+                  }
+                },
+                "method": "patch",
+                "path": "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent(parameters('azuretables_name')))}/tables/@{encodeURIComponent('EmailNotificationStatus')}/entities(PartitionKey='@{encodeURIComponent(triggerBody()?['telemetry']?['xcv'])}',RowKey='@{encodeURIComponent(triggerBody()?['telemetry']?['messageId'])}')"
+              },
+              "runAfter": {
+                "Initialize_variable_-_Email_Body": [
+                  "Succeeded"
+                ]
+              },
+              "type": "ApiConnection"
+            },
+            "Try_Sending_Email_Using_All_The_Configured_Accounts_Until_Successful": {
+              "actions": {
+                "On_Failure_-_Update_Next_Iteration": {
+                  "actions": {
+                    "When_Selected_Account_Failed_First_Time_Reset_The_Loop": {
+                      "description": "Reset the loop",
+                      "inputs": {
+                        "name": "CurrentIterationNumber",
+                        "value": 0
+                      },
+                      "runAfter": {},
+                      "type": "SetVariable"
+                    }
+                  },
+                  "description": "If it is first iteration and failed (which means first attempt), so restart the loop",
+                  "else": {
+                    "actions": {
+                      "When_Selected_Account_Failed_on_Retry_-_Then_Try_Next_Account": {
+                        "inputs": {
+                          "name": "CurrentIterationNumber",
+                          "value": 1
+                        },
+                        "runAfter": {},
+                        "type": "IncrementVariable"
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@iterationIndexes('Try_Sending_Email_Using_All_The_Configured_Accounts_Until_Successful')",
+                          0
+                        ]
+                      }
+                    ]
+                  },
+                  "runAfter": {
+                    "Update_EmailNotificationStatus_on_failure": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "If"
+                },
+                "Skip_Current_Iteration_On_Retry": {
+                  "actions": {
+                    "Skip_Current_Email_Account_On_Retry_As_It_Was_Already_Used_Once": {
+                      "description": "Skip by incrementing the current iteration by one (move to next account as it is already attempted once)",
+                      "inputs": {
+                        "name": "CurrentIterationNumber",
+                        "value": 1
+                      },
+                      "runAfter": {},
+                      "type": "IncrementVariable"
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "greater": [
+                          "@iterationIndexes('Try_Sending_Email_Using_All_The_Configured_Accounts_Until_Successful')",
+                          0
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@variables('SelectedAccountNumber')",
+                          "@variables('CurrentIterationNumber')"
+                        ]
+                      }
+                    ]
+                  },
+                  "runAfter": {},
+                  "type": "If"
+                },
+                "Switch_-_Select_the_Correct_Email_Account_and_Send_Email": {
+                  "cases": {
+                    "Case_1": {
+                      "actions": {
+                        "Send_an_email_(V2)_-_With_Account_1": {
+                          "inputs": {
+                            "body": {
+                              "Attachments": "@body('Create_Attachment_Object')",
+                              "Body": "<p>@{variables('EmailBody')}</p>",
+                              "Cc": "@triggerBody()?['cc']",
+                              "From": "[parameters('send_as_email')]",
+                              "Importance": "Normal",
+                              "Subject": "@triggerBody()?['subject']",
+                              "To": "@triggerBody()?['to']"
+                            },
+                            "host": {
+                              "connection": {
+                                "name": "@parameters('$connections')['office365']['connectionId']"
+                              }
+                            },
+                            "method": "post",
+                            "path": "/v2/Mail"
+                          },
+                          "runAfter": {},
+                          "type": "ApiConnection"
+                        }
+                      },
+                      "case": 0
+                    },
+                    "Case_2": {
+                      "actions": {
+                        "Send_an_email_(V2)_-_With_Account_2": {
+                          "inputs": {
+                            "body": {
+                              "Attachments": "@body('Create_Attachment_Object')",
+                              "Body": "<p>@{variables('EmailBody')}</p>",
+                              "Cc": "@triggerBody()?['cc']",
+                              "From": "[parameters('send_as_email')]",
+                              "Importance": "Normal",
+                              "Subject": "@triggerBody()?['subject']",
+                              "To": "@triggerBody()?['to']"
+                            },
+                            "host": {
+                              "connection": {
+                                "name": "@parameters('$connections')['office365']['connectionId']"
+                              }
+                            },
+                            "method": "post",
+                            "path": "/v2/Mail"
+                          },
+                          "runAfter": {},
+                          "type": "ApiConnection"
+                        }
+                      },
+                      "case": 1
+                    }
+                  },
+                  "default": {
+                    "actions": {}
+                  },
+                  "description": "Update Here: Add Cases to match the total email account and update each Send Email step with proper email connection",
+                  "expression": "@variables('CurrentIterationNumber')",
+                  "runAfter": {
+                    "Skip_Current_Iteration_On_Retry": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Switch"
+                },
+                "Update_EmailNotificationStatus_on_failure": {
+                  "inputs": {
+                    "body": {
+                      "AttachmentBlobName": "@triggerBody()?['attachmentBlobName']",
+                      "Bcc": "@triggerBody()?['bcc']",
+                      "Cc": "@triggerBody()?['cc']",
+                      "RunId": "@workflow()['run']['name']",
+                      "Status": "Error",
+                      "To": "@triggerBody()?['to']"
+                    },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azuretables']['connectionId']"
+                      }
+                    },
+                    "method": "patch",
+                    "path": "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent(parameters('azuretables_name')))}/tables/@{encodeURIComponent('EmailNotificationStatus')}/entities(PartitionKey='@{encodeURIComponent(triggerBody()?['telemetry']?['xcv'])}',RowKey='@{encodeURIComponent(triggerBody()?['telemetry']?['messageId'])}')"
+                  },
+                  "runAfter": {
+                    "Switch_-_Select_the_Correct_Email_Account_and_Send_Email": [
+                      "Failed"
+                    ]
+                  },
+                  "type": "ApiConnection"
+                },
+                "Update_EmailNotificationStatus_on_success": {
+                  "inputs": {
+                    "body": {
+                      "AttachmentBlobName": "@triggerBody()?['attachmentBlobName']",
+                      "Bcc": "@triggerBody()?['bcc']",
+                      "Cc": "@triggerBody()?['cc']",
+                      "RunId": "@workflow()['run']['name']",
+                      "Status": "Sent",
+                      "To": "@triggerBody()?['to']"
+                    },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['azuretables']['connectionId']"
+                      }
+                    },
+                    "method": "patch",
+                    "path": "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent(parameters('azuretables_name')))}/tables/@{encodeURIComponent('EmailNotificationStatus')}/entities(PartitionKey='@{encodeURIComponent(triggerBody()?['telemetry']?['xcv'])}',RowKey='@{encodeURIComponent(triggerBody()?['telemetry']?['messageId'])}')"
+                  },
+                  "runAfter": {
+                    "Switch_-_Select_the_Correct_Email_Account_and_Send_Email": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "ApiConnection"
+                },
+                "When_Successful_End_The_Loop": {
+                  "inputs": {
+                    "name": "CurrentIterationNumber",
+                    "value": "@add(variables('EmailAccountCount'),1)"
+                  },
+                  "runAfter": {
+                    "Update_EmailNotificationStatus_on_success": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable"
+                }
+              },
+              "description": "Try sending email with the selected account first, if it fails then try sending with all other accounts once",
+              "expression": "@greaterOrEquals(variables('CurrentIterationNumber'), variables('EmailAccountCount'))",
+              "limit": {
+                "count": 60,
+                "timeout": "PT1H"
+              },
+              "runAfter": {
+                "Update_Default_Email_Account_To_Use_First_-_Based_On_Input_Parameter": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Until"
+            },
+            "Update_Default_Email_Account_To_Use_First_-_Based_On_Input_Parameter": {
+              "actions": {
+                "Update_Email_Account_To_Use_For_First_Iteration": {
+                  "inputs": {
+                    "name": "CurrentIterationNumber",
+                    "value": "@variables('UserSelectedDefaultEmailAccount')"
+                  },
+                  "runAfter": {
+                    "Update_Email_Account_To_Use_based_On_Given_Parameter": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "SetVariable"
+                },
+                "Update_Email_Account_To_Use_based_On_Given_Parameter": {
+                  "inputs": {
+                    "name": "SelectedAccountNumber",
+                    "value": "@variables('UserSelectedDefaultEmailAccount')"
+                  },
+                  "runAfter": {},
+                  "type": "SetVariable"
+                }
+              },
+              "description": "If the user provided default account number is valid then use it to send email for the first attempt",
+              "expression": {
+                "and": [
+                  {
+                    "greaterOrEquals": [
+                      "@variables('UserSelectedDefaultEmailAccount')",
+                      0
+                    ]
+                  },
+                  {
+                    "less": [
+                      "@variables('UserSelectedDefaultEmailAccount')",
+                      "@variables('EmailAccountCount')"
+                    ]
+                  }
+                ]
+              },
+              "runAfter": {
+                "Initialize_and_Set_User_Selected_Default_Email_Account": [
+                  "Succeeded"
+                ]
+              },
+              "type": "If"
+            }
+          },
+          "contentVersion": "1.0.0.0",
+          "outputs": {},
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "triggers": {
+            "manual": {
+              "inputs": {
+                "schema": {
+                  "properties": {
+                    "applicationName": {
+                      "type": "string"
+                    },
+                    "attachments": {
+                      "items": {
+                        "properties": {
+                          "fileBase64": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          },
+                          "fileUrl": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "fileName",
+                          "fileBase64",
+                          "fileUrl"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "bcc": {
+                      "type": "string"
+                    },
+                    "body": {
+                      "type": "string"
+                    },
+                    "cc": {
+                      "type": "string"
+                    },
+                    "deeplinkUrl": {
+                      "type": "string"
+                    },
+                    "emailAccountNumberToUse": {
+                      "type": "string"
+                    },
+                    "from": {
+                      "type": "string"
+                    },
+                    "notificationTag": {
+                      "type": "string"
+                    },
+                    "notificationType": {
+                      "type": "string"
+                    },
+                    "sendOnUtcDate": {
+                      "type": "string"
+                    },
+                    "subject": {
+                      "type": "string"
+                    },
+                    "telemetry": {
+                      "properties": {
+                        "messageId": {
+                          "type": "string"
+                        },
+                        "xcv": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "templateData": {
+                      "properties": {
+                        "ActionDetails.Comment": {
+                          "type": "string"
+                        },
+                        "AdditionalData.ApproverType": {
+                          "type": "string"
+                        },
+                        "AdditionalData.RequestorName": {
+                          "type": "string"
+                        },
+                        "ApprovalIdentifier.DocumentNumber": {
+                          "type": "string"
+                        },
+                        "Approver.Alias": {
+                          "type": "string"
+                        },
+                        "Approver.Name": {
+                          "type": "string"
+                        },
+                        "ApproverChain": {
+                          "type": "string"
+                        },
+                        "ApproverNotes": {
+                          "type": "string"
+                        },
+                        "CustomAttribute.CustomAttributeValue": {
+                          "type": "string"
+                        },
+                        "DetailPage": {
+                          "type": "string"
+                        },
+                        "DetailPageURL": {
+                          "type": "string"
+                        },
+                        "DeviceDetailPage": {
+                          "type": "string"
+                        },
+                        "Submitter.Name": {
+                          "type": "string"
+                        },
+                        "TenantName": {
+                          "type": "string"
+                        },
+                        "Title": {
+                          "type": "string"
+                        },
+                        "ToolName": {
+                          "type": "string"
+                        },
+                        "UnitOfMeasure": {
+                          "type": "string"
+                        },
+                        "UnitValue": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "templateId": {
+                      "type": "string"
+                    },
+                    "tenantIdentifier": {
+                      "type": "string"
+                    },
+                    "to": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "kind": "Http",
+              "type": "Request"
+            }
+          }
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuretables": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_azuretables_name'))]",
+                "connectionName": "azuretables",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                },
+                "id": "[concat('/subscriptions/', parameters('subscription_id'), '/providers/Microsoft.Web/locations/', parameters('resource_location_code'), '/managedApis/azuretables')]"
+              },
+              "office365": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_office365_name'))]",
+                "connectionName": "office365",
+                "id": "[concat('/subscriptions/', parameters('subscription_id'), '/providers/Microsoft.Web/locations/', parameters('resource_location_code'), '/managedApis/office365')]"
+              },
+              "keyvault": {
+                "connectionId": "[resourceId('Microsoft.Web/connections', parameters('connections_keyvault_name'))]",
+                "connectionName": "keyvault",
+                "connectionProperties": {
+                  "authentication": {
+                    "type": "ManagedServiceIdentity"
+                  }
+                },
+                "id": "[concat('/subscriptions/', parameters('subscription_id'), '/providers/Microsoft.Web/locations/', parameters('resource_location_code'), '/managedApis/keyvault')]"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

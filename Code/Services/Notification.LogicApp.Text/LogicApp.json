@@ -1,0 +1,338 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workflows_TextNotification_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'TextNotification'),parameters('resource_env_suffix'))]",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "metadata": {
+        "description": "Name of the Logic App."
+      }
+    },
+    "resource_location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "allowedValues": [
+        "[resourceGroup().location]",
+        "australiaeast",
+        "australiasoutheast",
+        "brazilsouth",
+        "centralus",
+        "eastasia",
+        "eastus",
+        "eastus2",
+        "japaneast",
+        "japanwest",
+        "northcentralus",
+        "northeurope",
+        "southcentralus",
+        "southeastasia",
+        "westeurope",
+        "westus"
+      ],
+      "metadata": {
+        "description": "Location of the Logic App."
+      }
+    },
+    "resource_location_code": {
+      "defaultValue": "[tolower(replace(replace(resourceGroup().location,')', ''),'(',''))]",
+      "type": "String",
+      "metadata": {
+        "description": "Location/code to deploy the Azure Resources (e.g. Central US/centralus. Powershell Command: Get-AzureRmLocation |Format-Table)"
+      }
+    },
+    "resource_group_name": {
+      "defaultValue": "[resourceGroup().name]",
+      "type": "String"
+    },
+    "resource_name_prefix": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Prefix which will be added at the beginning of each resource name"
+      }
+    },
+    "resource_env_suffix": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Env specific suffix which will be added to each resource name"
+      }
+    },
+    "subscription_id": {
+      "defaultValue": "[subscription().subscriptionId]",
+      "type": "String"
+    },
+    "connections_azuretables_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'Storage'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "connections_azuretables_id": {
+      "defaultValue": "[concat('/subscriptions/', parameters('subscription_id'), '/resourceGroups/', parameters('resource_group_name'), '/providers/Microsoft.Web/connections/', parameters('connections_azuretables_name'))]",
+      "type": "String"
+    },
+    "connections_twilio_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'Twilio'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "connections_twilio_id": {
+      "defaultValue": "[concat('/subscriptions/', parameters('subscription_id'), '/resourceGroups/', parameters('resource_group_name'), '/providers/Microsoft.Web/connections/', parameters('connections_twilio_name'))]",
+      "type": "String"
+    }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "name": "[parameters('workflows_TextNotification_name')]",
+      "location": "[parameters('resource_location')]",
+      "type": "Microsoft.Logic/workflows",
+      "tags": {
+        "displayName": "LogicApp"
+      },
+      "apiVersion": "2016-06-01",
+      "properties": {
+        "state": "Enabled",
+        "definition": {
+          "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "$connections": {
+              "defaultValue": {},
+              "type": "Object"
+            }
+          },
+          "staticResults": {
+            "Send_Text_Message_(SMS)2": {
+              "status": "Succeeded",
+              "outputs": {
+                "headers": {},
+                "statusCode": "OK"
+              }
+            }
+          },
+          "triggers": {
+            "manual": {
+              "type": "Request",
+              "kind": "Http",
+              "inputs": {
+                "schema": {
+                  "properties": {
+                    "applicationName": {
+                      "type": "string"
+                    },
+                    "attachmentBlobName": {
+                      "type": "string"
+                    },
+                    "attachments": {
+                      "items": {
+                        "properties": {
+                          "fileBase64": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          },
+                          "fileUrl": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "fileName",
+                          "fileBase64",
+                          "fileUrl"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "bcc": {
+                      "type": "string"
+                    },
+                    "body": {
+                      "type": "string"
+                    },
+                    "cc": {
+                      "type": "string"
+                    },
+                    "deeplinkUrl": {
+                      "type": "string"
+                    },
+                    "from": {
+                      "type": "string"
+                    },
+                    "notificationTag": {
+                      "type": "string"
+                    },
+                    "notificationType": {
+                      "type": "string"
+                    },
+                    "sendOnUtcDate": {
+                      "type": "string"
+                    },
+                    "subject": {
+                      "type": "string"
+                    },
+                    "telemetry": {
+                      "properties": {
+                        "messageId": {
+                          "type": "string"
+                        },
+                        "xcv": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "templateData": {
+                      "properties": {
+                        "ActionDetails.Comment": {
+                          "type": "string"
+                        },
+                        "AdditionalData.ApproverType": {
+                          "type": "string"
+                        },
+                        "AdditionalData.RequestorName": {
+                          "type": "string"
+                        },
+                        "ApprovalIdentifier.DocumentNumber": {
+                          "type": "string"
+                        },
+                        "Approver.Alias": {
+                          "type": "string"
+                        },
+                        "Approver.Name": {
+                          "type": "string"
+                        },
+                        "ApproverChain": {
+                          "type": "string"
+                        },
+                        "ApproverNotes": {
+                          "type": "string"
+                        },
+                        "CustomAttribute.CustomAttributeValue": {
+                          "type": "string"
+                        },
+                        "DetailPageURL": {
+                          "type": "string"
+                        },
+                        "DetailPage": {
+                          "type": "string"
+                        },
+                        "DeviceDetailPage": {
+                          "type": "string"
+                        },
+                        "Submitter.Name": {
+                          "type": "string"
+                        },
+                        "TenantName": {
+                          "type": "string"
+                        },
+                        "Title": {
+                          "type": "string"
+                        },
+                        "ToolName": {
+                          "type": "string"
+                        },
+                        "UnitOfMeasure": {
+                          "type": "string"
+                        },
+                        "UnitValue": {
+                          "type": "string"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "templateId": {
+                      "type": "string"
+                    },
+                    "tenantIdentifier": {
+                      "type": "string"
+                    },
+                    "to": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "actions": {
+            "Send_SMS_for_each_phone_number": {
+              "foreach": "@body('Get_User_Phone_Number_from_Azure_Storage')?['value']",
+              "actions": {
+                "Send_Text_Message_(SMS)": {
+                  "runAfter": {},
+                  "type": "ApiConnection",
+                  "inputs": {
+                    "body": {
+                      "body": "@{json(base64ToString(triggerBody()?['ContentData'])).subject}",
+                      "from": "+12526801035",
+                      "to": "@{body('Get_User_Phone_Number_from_Azure_Storage')?['value'][0].PhoneNumber}"
+                    },
+                    "host": {
+                      "connection": {
+                        "name": "@parameters('$connections')['twilio']['connectionId']"
+                      }
+                    },
+                    "method": "post",
+                    "path": "/Messages.json"
+                  },
+                  "runtimeConfiguration": {
+                    "staticResult": {
+                      "staticResultOptions": "Enabled",
+                      "name": "Send_Text_Message_(SMS)2"
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_User_Phone_Number_from_Azure_Storage": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach"
+            },
+            "Get_User_Phone_Number_from_Azure_Storage": {
+              "runAfter": {},
+              "type": "ApiConnection",
+              "inputs": {
+                "host": {
+                  "connection": {
+                    "name": "@parameters('$connections')['azuretables']['connectionId']"
+                  }
+                },
+                "method": "get",
+                "path": "/Tables/@{encodeURIComponent('UserPreferenceSetting')}/entities",
+                "queries": {
+                  "$filter": "@{concat('PartitionKey eq ''', triggerBody()?['to'], '''')}",
+                  "$select": "PhoneNumber"
+                }
+              }
+            }
+          },
+          "outputs": {}
+        },
+        "parameters": {
+          "$connections": {
+            "value": {
+              "azuretables": {
+                "connectionId": "[parameters('connections_azuretables_id')]",
+                "connectionName": "azuretables",
+                "id": "[concat('/subscriptions/', parameters('subscription_id'), '/providers/Microsoft.Web/locations/', parameters('resource_location_code'), '/managedApis/azuretables')]"
+              },
+              "twilio": {
+                "connectionId": "[parameters('connections_twilio_id')]",
+                "connectionName": "twilio",
+                "id": "[concat('/subscriptions/', parameters('subscription_id'), '/providers/Microsoft.Web/locations/', parameters('resource_location_code'), '/managedApis/twilio')]"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

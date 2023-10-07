@@ -1,0 +1,190 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Notification.Services</name>
+    </assembly>
+    <members>
+        <member name="M:Notification.Services.Controllers.PushNotificationRegistrationController.Get">
+            <summary>
+            API controller to Get all Push Registration info from notification hub
+            </summary>
+            <returns>returns a task</returns>
+        </member>
+        <member name="M:Notification.Services.Controllers.PushNotificationRegistrationController.Post">
+            <summary>
+            API controller to Create Push Registration ID in notification hub
+            </summary>
+            <returns>returns a task of string</returns>
+        </member>
+        <member name="M:Notification.Services.Controllers.PushNotificationRegistrationController.Put(Notification.Contract.DeviceRegistration)">
+            <summary>
+            API controller to Create/Update Push Registration in notification hub
+            </summary>
+            <param name="registrationInfo">Device registration info</param>
+            <returns>returns a Task</returns>
+        </member>
+        <member name="M:Notification.Services.Controllers.PushNotificationRegistrationController.Delete(System.String)">
+            <summary>
+            API controller to Delete Push Registration from notification hub
+            </summary>
+            <param name="id">registration id</param>
+            <returns>returns a task</returns>
+        </member>
+        <member name="M:Notification.Services.Controllers.WebPushNotificationRegistrationController.Get">
+            <summary>
+            API controller to get Web Push Registration from database
+            </summary>
+            <returns>returns a JSON array</returns>
+        </member>
+        <member name="M:Notification.Services.Controllers.WebPushNotificationRegistrationController.Post">
+            <summary>
+            API controller to Create Web Push Registration in database
+            </summary>
+            <returns>returns a task</returns>
+        </member>
+        <member name="M:Notification.Services.Controllers.WebPushNotificationRegistrationController.Delete">
+            <summary>
+            API controller to Delete Web Push Registration in database
+            </summary>
+            <returns>returns a task</returns>
+        </member>
+        <member name="T:Notification.Services.Helpers.PushNotificationRegistrationHelper">
+            <summary>
+            Helper class to Create/Update/Delete push registration entry in notificationn hub
+            </summary>
+        </member>
+        <member name="M:Notification.Services.Helpers.PushNotificationRegistrationHelper.GetRegistrationInfo">
+            <summary>
+            Gets the push registration info
+            </summary>
+            <returns>Returns the registration info if for the given user</returns>
+        </member>
+        <member name="M:Notification.Services.Helpers.PushNotificationRegistrationHelper.CreateRegistrationId(System.String)">
+            <summary>
+            Creates the push registration id
+            </summary>
+            <param name="handle">the push handle</param>
+            <returns>Returns the registration id if created successfully else returns null</returns>
+        </member>
+        <member name="M:Notification.Services.Helpers.PushNotificationRegistrationHelper.CreateOrUpdateRegistration(System.String,Notification.Contract.DeviceRegistration)">
+            <summary>
+            This creates or updates a registration (with provided PNS handle) at the specified id
+            </summary>
+            <param name="alias">Alias of the user</param>
+            <param name="registrationInfo"></param>
+            <returns>Returns all active registrations for the user</returns>
+        </member>
+        <member name="M:Notification.Services.Helpers.PushNotificationRegistrationHelper.DeleteRegistration(System.String)">
+            <summary>
+            Deletes the push registration entry in notification hub for the user/device combination
+            </summary>
+            <param name="id">the registration id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Notification.Services.Helpers.PushNotificationRegistrationHelper.ReturnGoneIfHubResponseIsGone(Microsoft.Azure.NotificationHubs.Messaging.MessagingException)">
+            <summary>
+            Checks if the exception has an internal response code of HttpStatusCode.Gone then throw a new HttpRequestException with HttpStatusCode as Gone
+            </summary>
+            <param name="e"></param>
+        </member>
+        <member name="T:Notification.Services.Helpers.WebPushNotificationRegistrationHelper">
+            <summary>
+            Helper class to Create/Update/Delete Web push registration entry in database
+            </summary>
+        </member>
+        <member name="M:Notification.Services.Helpers.WebPushNotificationRegistrationHelper.#ctor(Notification.Data.Azure.Storage.Interface.ITableHelper,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="storageTableDataHelperWebPushRegistration"></param>
+            <param name="config"></param>
+        </member>
+        <member name="M:Notification.Services.Helpers.WebPushNotificationRegistrationHelper.GetRegistration(System.String)">
+            <summary>
+            Gets the web push registration entries in the database for the user
+            </summary>
+            <param name="alias">Alias of the user</param>
+            <returns>Returns all active registrations for the user</returns>
+        </member>
+        <member name="M:Notification.Services.Helpers.WebPushNotificationRegistrationHelper.CreateRegistration(System.String,System.String)">
+            <summary>
+            Creates the web push registration entry in the database for the user/device combination
+            </summary>
+            <param name="alias">Alias of the user</param>
+            <param name="registrationInfo">Registration details like browser/endpoint configuration</param>
+            <returns></returns>
+        </member>
+        <member name="M:Notification.Services.Helpers.WebPushNotificationRegistrationHelper.DeleteRegistration(System.String,System.String)">
+            <summary>
+            Deletes the web push registration entry in the database for the user/device combination
+            </summary>
+            <param name="alias">Alias of the user</param>
+            <param name="registrationInfo">Registration details like browser/endpoint configuration</param>
+            <returns></returns>
+        </member>
+        <member name="M:Notification.Services.Interface.IPushNotificationRegistration.GetRegistrationInfo">
+            <summary>
+            Gets the push registration info
+            </summary>
+            <returns>Returns the registration info if for the given user</returns>
+        </member>
+        <member name="M:Notification.Services.Interface.IPushNotificationRegistration.CreateRegistrationId(System.String)">
+            <summary>
+            Creates the push registration id
+            </summary>
+            <param name="handle">the push handle</param>
+            <returns>Returns the registration id if created successfully else returns null</returns>
+        </member>
+        <member name="M:Notification.Services.Interface.IPushNotificationRegistration.CreateOrUpdateRegistration(System.String,Notification.Contract.DeviceRegistration)">
+            <summary>
+            Updates the  push registration entry in notification hub for the user/device combination
+            </summary>
+            <param name="alias">Alias of the user</param>
+            <param name="registrationInfo">Registration details like endpoint configuration</param>
+            <returns></returns>
+        </member>
+        <member name="M:Notification.Services.Interface.IPushNotificationRegistration.DeleteRegistration(System.String)">
+            <summary>
+            Deletes the push registration entry in notification hub for the user/device combination
+            </summary>
+            <param name="id">the registration id</param>
+            <returns></returns>
+        </member>
+        <member name="M:Notification.Services.Interface.IWebPushNotificationRegistration.GetRegistration(System.String)">
+            <summary>
+            Gets the web push registration entries in the database for the user
+            </summary>
+            <param name="alias">Alias of the user</param>
+            <returns>Returns all active registrations for the user</returns>
+        </member>
+        <member name="M:Notification.Services.Interface.IWebPushNotificationRegistration.CreateRegistration(System.String,System.String)">
+            <summary>
+            Creates the web push registration entry in the database for the user/device combination
+            </summary>
+            <param name="alias">Alias of the user</param>
+            <param name="registrationInfo">Registration details like browser/endpoint configuration</param>
+            <returns></returns>
+        </member>
+        <member name="M:Notification.Services.Interface.IWebPushNotificationRegistration.DeleteRegistration(System.String,System.String)">
+            <summary>
+            Deletes the web push registration entry in the database for the user/device combination
+            </summary>
+            <param name="alias">Alias of the user</param>
+            <param name="registrationInfo">Registration details like browser/endpoint configuration</param>
+            <returns></returns>
+        </member>
+        <member name="T:Notification.Services.Utils.AuthorizationMiddleware">
+            <summary>
+            Custom Authorization Middleware class which takes care of additional security checks
+            </summary>
+        </member>
+        <member name="M:Notification.Services.Utils.AuthorizationMiddleware.InvokeAsync(Microsoft.AspNetCore.Http.HttpContext,Microsoft.AspNetCore.Http.RequestDelegate)">
+            <summary>
+            Create Claims Principal from Request Headers which are added by Azure App Service Authentication (EasyAuth) and validate the required claims as applicable
+            </summary>
+            <param name="context"></param>
+            <param name="next"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
