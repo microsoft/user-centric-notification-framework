@@ -220,7 +220,7 @@ See the [SETUP.md](SETUP.md) file for details
 ## Authors
 
 * **Chinmaya Rath**
-* **Nirav Khandedia** 
+* **Nirav Khandhedia** 
 
 ## License
 
