@@ -1,4 +1,7 @@
 # Notification Framework
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/microsoft/user-centric-notification-framework?include_prereleases)
+[![CodeQL](https://github.com/microsoft/user-centric-notification-framework/actions/workflows/codeql.yml/badge.svg)](https://github.com/microsoft/user-centric-notification-framework/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/microsoft/user-centric-notification-framework/badge)](https://api.securityscorecards.dev/projects/github.com/microsoft/user-centric-notification-framework)
 
 Notification framework is a ready-to-use framework which can be plugged into any application for their notification needs.
 The notifications currently supported are:
