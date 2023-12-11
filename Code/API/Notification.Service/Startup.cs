@@ -84,11 +84,6 @@ public class Startup
         }
 
         app.UseSwagger();
-        app.UseSwaggerUI(c =>
-        {
-            c.RoutePrefix = "";
-            c.SwaggerEndpoint("../swagger/v1/swagger.json", "Notification Services");
-        });
 
         app.UseHttpsRedirection();
         app.UseAzureAppConfiguration();
