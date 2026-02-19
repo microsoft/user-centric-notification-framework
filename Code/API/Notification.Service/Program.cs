@@ -23,17 +23,22 @@ public class Program
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
                 var settings = config.Build();
+#if DEBUG
+                var azureCredential = new DefaultAzureCredential(); // CodeQL [SM05137] Suppress CodeQL issue since we only use DefaultAzureCredential in development environments.
+#else
+                var azureCredential = new ManagedIdentityCredential();
+#endif
                 // Add the Azure App Configuration to the configuration builder
                 config.AddAzureAppConfiguration(options =>
                 {
-                    options.Connect(new Uri(settings?[Constant.AzureAppConfigurationUrl]), new DefaultAzureCredential())
+                    options.Connect(new Uri(settings?[Constant.AzureAppConfigurationUrl]), azureCredential)
                         // Load configuration values with no label
                         .Select(KeyFilter.Any, LabelFilter.Null)
                         // Load configurations for current feature
                         .Select(KeyFilter.Any, settings?[Constant.FeatureName])
                         .ConfigureKeyVault(kv =>
                         {
-                            kv.SetCredential(new DefaultAzureCredential());
+                            kv.SetCredential(azureCredential);
                         })
                         .ConfigureRefresh(refreshOptions =>
                         {

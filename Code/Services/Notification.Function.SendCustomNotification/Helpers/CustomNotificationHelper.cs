@@ -71,7 +71,7 @@ public class CustomNotificationHelper : ICustomNotificationHelper
             {
                 try
                 {
-                    response = await _httpHelper.SendRequestAsync(HttpMethod.Post, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, endPoint, JsonConvert.SerializeObject(notificationItem), null, false);
+                    response = await _httpHelper.SendRequestAsync(HttpMethod.Post, string.Empty, endPoint, JsonConvert.SerializeObject(notificationItem), null, false);
 
                     // Get response content
                     string content = await response.Content.ReadAsStringAsync();

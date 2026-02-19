@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <!-- preserve GUID so you can reuse solution mapping if needed -->
+    <ProjectGuid>{B3652601-D816-4450-B6B6-38A271F3E1F2}</ProjectGuid>
+    <Authors>Infrastructure</Authors>
+    <Description>Deployment project for Shared Resources (ARM templates + scripts)</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Deploy-AzureResourceGroup.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- explicit Deploy target; uses the existing script. Consider migrating script to Az module or az cli. -->
+  <Target Name="Deploy" DependsOnTargets="Build">
+    <Message Text="Running deployment script: $(MSBuildProjectDirectory)\Deploy-AzureResourceGroup.ps1" Importance="High" />
+    <Exec Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildProjectDirectory)\Deploy-AzureResourceGroup.ps1&quot; -ResourceGroupLocation &quot;eastus&quot;" />
+  </Target>
+</Project>

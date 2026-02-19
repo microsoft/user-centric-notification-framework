@@ -44,7 +44,12 @@ namespace Notification.BL.Common.Helpers
             _logger = logger;
             _tableStorageHelper = tableStorageHelper;
             _blobStorageHelper = blobStorageHelper;
-            _serviceBusClient = new ServiceBusClient(_config[Constant.ServiceBusNamespace], new DefaultAzureCredential());
+#if DEBUG
+            var azureCredential = new DefaultAzureCredential(); // CodeQL [SM05137] Suppress CodeQL issue since we only use DefaultAzureCredential in development environments.
+#else
+            var azureCredential = new ManagedIdentityCredential();
+#endif
+            _serviceBusClient = new ServiceBusClient(_config[Constant.ServiceBusNamespace], azureCredential);
         }
 
         #endregion Constructor

@@ -196,3 +196,6 @@ ModelManifest.xml
 *.pubxml
 /Code/Domain/Internal
 /Code/Domain/Notification.Domain.BL.SendEmail/Internal
+/Infrastructure/pipelines/
+/.pipelines
+/NuGet.config

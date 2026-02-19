@@ -8,6 +8,8 @@ namespace Notification.BL.Common.Helpers
     using System.Globalization;
     using System.Threading;
     using System.Threading.Tasks;
+    using Azure.Core;
+    using Azure.Identity;
     using Extension;
     using Interface;
     using Microsoft.Extensions.Logging;
@@ -83,6 +85,60 @@ namespace Notification.BL.Common.Helpers
             } while (retry && (retryCount < 3));
 
             return result;
+        }
+
+        /// <summary>
+        /// Get OAuth 2.0 token generated using Managed Identity
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="resourceUri"></param>
+        /// <returns>AuthenticationResult token</returns>
+        public async Task<string> GetManagedIdentityToken(string clientId, string resourceUri)
+        {
+            LogData logData = new LogData()
+            {
+                EventDetails = new Dictionary<string, object>() {
+                    { Constant.BusinessProcessName, "Authentication - Get ManagedIdentity AccessToken" },
+                    { Constant.ActionUri, "GetManagedIdentityToken" },
+                    { Constant.ComponentType, ComponentType.WorkflowComponent }
+                }
+            };
+
+            string accessToken = string.Empty;
+            var retryCount = 0;
+            bool retry;
+            do
+            {
+                retry = false;
+                try
+                {
+                #if DEBUG
+                    var tokenCredential = new DefaultAzureCredential(new DefaultAzureCredentialOptions { ManagedIdentityClientId = clientId }); // CodeQL [SM05137] Suppress CodeQL issue since we only use DefaultAzureCredential in development environments.
+                #else    
+                    var tokenCredential = new ManagedIdentityCredential(clientId);
+                #endif
+                    var tokenResponse = await tokenCredential.GetTokenAsync(new TokenRequestContext(new[] { resourceUri + "/.default" }));
+                    accessToken = tokenResponse.Token;
+                }
+                catch (MsalServiceException ex)
+                {
+                    if (ex.ErrorCode == "temporarily_unavailable")
+                    {
+                        retry = true;
+                        retryCount++;
+                        Thread.Sleep(3000);
+                    }
+
+                    logData.EventDetails.Modify(Constant.AppAction, "Authentication - Get ManagedIdentity AccessToken - Failed - Exception");
+                    using (_logger.BeginScope(logData.EventDetails))
+                    {
+                        _logger.LogError(new EventId((int)EventIds.GenericError),
+                            ex, $"An error occurred while acquiring a token\nTime: {DateTime.Now.ToString(CultureInfo.InvariantCulture)}\nError: {ex}\nRetry: {retry.ToString()}\n");
+                    }
+                }
+            } while (retry && (retryCount < 3));
+
+            return accessToken;
         }
     }
 }

@@ -73,7 +73,7 @@ public class ReminderNotificationHelper : IReminderNotificationHelper
             notificationItem.Subject = !notificationItem.Subject.StartsWith("Reminder") ? $"Reminder: {notificationItem.Subject}" : notificationItem.Subject;
 
             // Send request
-            response = await _httpHelper.SendRequestAsync(HttpMethod.Post, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, _functionUrl, JsonConvert.SerializeObject(notificationItem));
+            response = await _httpHelper.SendRequestAsync(HttpMethod.Post, string.Empty, _functionUrl, JsonConvert.SerializeObject(notificationItem));
 
             // Get response content
             string content = await response.Content.ReadAsStringAsync();

@@ -20,9 +20,6 @@ namespace Notification.BL.Common
         public const string NotificationHubDefaultFullSharedAccessSignature = "NotificationHubDefaultFullSharedAccessSignature";
         public const string HubName = "HubName";
         public const string MustUpdateConfig = "MustUpdateConfig";
-        public const string IdentityProviderClientId = "IdentityProviderClientId";
-        public const string IdentityProviderAppKey = "IdentityProviderAppKey";
-        public const string IdentityProviderAuthority = "IdentityProviderAuthority";
         public const string IdentityProviderResource = "IdentityProviderResource";
         public const string WebPushNotificationRegistrationTableName = "WebPushNotificationRegistration";
         public const string DeviceNotificationTemplatesTableName = "DeviceNotificationTemplates";
@@ -53,6 +50,8 @@ namespace Notification.BL.Common
         public const string EmailNotificationStatusTableName = "EmailNotificationStatus";
         public const string EESNotificationStatusTableName = "EESNotificationStatus";
         public const string NotificationStatusTableName = "NotificationStatus";
+
+        public const string ManagedIdentityClientId = "ManagedIdentityClientId";
 
         // Logging
 

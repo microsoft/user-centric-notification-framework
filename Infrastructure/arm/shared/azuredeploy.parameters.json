@@ -1,0 +1,158 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resource_name_prefix": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Prefix which will be added at the beginning of each resource name"
+      }
+    },
+    "resource_env_suffix": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Env specific suffix which will be added to each resource name"
+      }
+    },
+    "subscription_id": {
+      "defaultValue": "[subscription().subscriptionId]",
+      "type": "String"
+    },
+    "resource_group_name": {
+      "defaultValue": "[resourceGroup().name]",
+      "type": "String"
+    },
+    "resource_location": {
+      "defaultValue": "[resourceGroup().location]",
+      "type": "String",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "resource_location_code": {
+      "defaultValue": "[tolower(replace(replace(resourceGroup().location,')', ''),'(',''))]",
+      "type": "String",
+      "metadata": {
+        "description": "Location/code to deploy the Azure Resources (e.g. Central US/centralus. Powershell Command: Get-AzureRmLocation |Format-Table)"
+      }
+    },
+    "active_directory_client_id": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "active_directory_client_secret": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "active_directory_resource": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "active_directory_tenant_id": {
+      "defaultValue": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+      "type": "String"
+    },
+    "configurationStores_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'Configuration'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "applicationinsights_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'Notification'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "storage_account_name": {
+      "defaultValue": "[concat(concat(toLower(parameters('resource_name_prefix')), 'notify'),toLower(parameters('resource_env_suffix')))]",
+      "type": "String"
+    },
+    "servicebus_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'Notification'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "connections_azuretables_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'Storage'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "connections_azuretables_display_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'Storage'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "connections_azuretables_id": {
+      "defaultValue": "[concat('/subscriptions/', parameters('subscription_id'), '/resourceGroups/', parameters('resource_group_name'), '/providers/Microsoft.Web/connections/', parameters('connections_azuretables_name'))]",
+      "type": "String"
+    },
+    "connections_office365_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'Office365'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "connections_office365_connection_name": {
+      "defaultValue": "",
+      "type": "String"
+    },
+    "connections_twilio_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'Twilio'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "connections_twilio_display_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'Twilio'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "connections_twilio_id": {
+      "defaultValue": "[concat('/subscriptions/', parameters('subscription_id'), '/resourceGroups/', parameters('resource_group_name'), '/providers/Microsoft.Web/connections/', parameters('connections_twilio_name'))]",
+      "type": "String"
+    },
+    "functionapp_notificationcommonservices_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'NotificationCommonServices'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "serverfarms_functionappservicesappserviceplan_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'FunctionAppServicePlan'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "serverfarms_functionappservicesappserviceplan_id": {
+      "defaultValue": "[concat('/subscriptions/', parameters('subscription_id'), '/resourceGroups/', parameters('resource_group_name'), '/providers/Microsoft.Web/serverfarms/', parameters('serverfarms_functionappservicesappserviceplan_name'))]",
+      "type": "String"
+    },
+    "serverfarms_webappservicesappserviceplan_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'WebAppServicePlan'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "serverfarms_webappservicesappserviceplan_id": {
+      "defaultValue": "[concat('/subscriptions/', parameters('subscription_id'), '/resourceGroups/', parameters('resource_group_name'), '/providers/Microsoft.Web/serverfarms/', parameters('serverfarms_webappservicesappserviceplan_name'))]",
+      "type": "String"
+    },
+    "functionapp_sendemailnotification_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'SendEmailNotification'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "functionapp_getemailnotificationstatus_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'SendEnterpriseEmailNotification'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "workflows_EmailNotification_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'EmailNotification'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "functionapp_sendtextnotification_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'SendTextNotification'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "workflows_TextNotification_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'TextNotification'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "webapp_notificationservices_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'NotificationServices'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "functionapp_sendpushnotification_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'SendPushNotification'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    },
+    "functionapp_sendremindernotification_name": {
+      "defaultValue": "[concat(concat(parameters('resource_name_prefix'), 'SendReminderNotification'),parameters('resource_env_suffix'))]",
+      "type": "String"
+    }
+  }
+}

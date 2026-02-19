@@ -29,11 +29,7 @@ namespace Notification.BL.Common.Helpers
         /// Send Request to target REST endpoint
         /// </summary>
         /// <param name="method"></param>
-        /// <param name="clientId"></param>
-        /// <param name="clientKey"></param>
-        /// <param name="authority"></param>
         /// <param name="resourceUri"></param>
-        /// <param name="scope"></param>
         /// <param name="targetUri"></param>
         /// <param name="content"></param>
         /// <param name="headers"></param>
@@ -41,11 +37,7 @@ namespace Notification.BL.Common.Helpers
         /// <returns></returns>
         public async Task<HttpResponseMessage> SendRequestAsync(
             HttpMethod method,
-            string clientId,
-            string clientKey,
-            string authority,
             string resourceUri,
-            string scope,
             string targetUri,
             string content = "",
             Dictionary<string, string> headers = null,
@@ -53,34 +45,13 @@ namespace Notification.BL.Common.Helpers
         {
             if (isTokenAttachedRequired)
             {
-                if (string.IsNullOrWhiteSpace(clientId))
-                {
-                    clientId = _config[Constant.IdentityProviderClientId];
-                }
-                if (string.IsNullOrWhiteSpace(clientKey))
-                {
-                    clientKey = _config[Constant.IdentityProviderAppKey];
-                }
-                if (string.IsNullOrWhiteSpace(authority))
-                {
-                    authority = _config[Constant.IdentityProviderAuthority];
-                }
                 if (string.IsNullOrWhiteSpace(resourceUri))
                 {
                     resourceUri = _config[Constant.IdentityProviderResource];
                 }
-                if (string.IsNullOrWhiteSpace(scope))
-                {
-                    scope = "/.default";
-                }
 
                 // Get Access token
-                var accessToken = (await _authenticationHelper.GetAccessToken(
-                    clientId,
-                    clientKey,
-                    authority,
-                    resourceUri,
-                    scope)).AccessToken;
+                var accessToken = await _authenticationHelper.GetManagedIdentityToken(_config[Constant.ManagedIdentityClientId].ToString(), resourceUri);
 
                 _client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue(Constant.Bearer, accessToken);
