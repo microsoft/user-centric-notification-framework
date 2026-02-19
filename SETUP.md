@@ -8,7 +8,7 @@ with the following schema
 
 | Column Name | DataType | Notes |
 |--------|------|--------|
-| PartitionKey | String | Tenant Identifer - Integer (specified in the notification payload) |
+| PartitionKey | String | Tenant Identifier - Integer (specified in the notification payload) |
 | RowKey | String | Email template name (specified in the notification payload) |
 | TemplateContent | String | Html email template with placeholders in the format #placeholders# |
 
@@ -73,7 +73,7 @@ with the following schema (it will be automatically created as this is Object Or
 | UserAlias | String | User UPN (e.g. alias@domain.com) which is going to be unique |
 | EndPoint | String | Property of the PushSubscription interface returns a [USVString](https://developer.mozilla.org/en-US/docs/Web/API/USVString) containing the endpoint associated with the push subscription. |
 | Auth | String | An authentication secret, as described in [Message Encryption for Web Push](https://tools.ietf.org/html/draft-ietf-webpush-encryption-08). |
-| P256DH | String | An [Elliptic curve Diffie�Hellman](https://en.wikipedia.org/wiki/Elliptic_curve_Diffie%E2%80%93Hellman) public key on the P-256 curve (that is, the NIST secp256r1 elliptic curve).  The resulting key is an uncompressed point in ANSI X9.62 format. |
+| P256DH | String | An [Elliptic-curve Diffie–Hellman](https://en.wikipedia.org/wiki/Elliptic_curve_Diffie%E2%80%93Hellman) public key on the P-256 curve (that is, the NIST secp256r1 elliptic curve).  The resulting key is an uncompressed point in ANSI X9.62 format. |
 | ExpirationTime | String | Property of the PushSubscription interface returns a [DOMHighResTimeStamp](https://developer.mozilla.org/en-US/docs/Web/API/DOMHighResTimeStamp) of the subscription expiration time associated with the push subscription, if there is one, or null otherwise. |
 
 
@@ -91,7 +91,7 @@ with the following schema
 | Column Name | DataType | Notes |
 |--------|------|--------|
 | PartitionKey | String | Notification Type e.g. Badge, Raw, Tile, Toast |
-| RowKey | String | Form factor's underlying service where the notifcation will be sent e.g. wns, apns, fcm |
+| RowKey | String | Form factor's underlying service where the notification will be sent e.g. wns, apns, fcm |
 | TemplateContent | String | XML/JSON based template with placeholders in the format #placeholders# |
 
 ```

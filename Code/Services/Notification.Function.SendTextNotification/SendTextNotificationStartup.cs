@@ -44,17 +44,23 @@ public class SendTextNotificationStartup : FunctionsStartup
         // Build the config in order to access the appsettings for getting the Azure App Configuration connection settings
         var config = configurationBuilder.Build();
 
+#if DEBUG
+        var azureCredential = new DefaultAzureCredential(); // CodeQL [SM05137] Suppress CodeQL issue since we only use DefaultAzureCredential in development environments.
+#else
+        var azureCredential = new ManagedIdentityCredential();
+#endif
+
         // Add the Azure App Configuration to the configuration builder
         configurationBuilder.AddAzureAppConfiguration(options =>
         {
-            options.Connect(new Uri(Environment.GetEnvironmentVariable(Constant.AzureAppConfigurationUrl)), new DefaultAzureCredential())
+            options.Connect(new Uri(Environment.GetEnvironmentVariable(Constant.AzureAppConfigurationUrl)), azureCredential)
                 // Load configuration values with no label
                 .Select(KeyFilter.Any, LabelFilter.Null)
                 // Load configurations for current feature
                 .Select(KeyFilter.Any, Environment.GetEnvironmentVariable(Constant.FeatureName))
                 .ConfigureKeyVault(kv =>
                 {
-                    kv.SetCredential(new DefaultAzureCredential());
+                    kv.SetCredential(azureCredential);
                 })
                 .ConfigureRefresh(refreshOptions =>
                 {
@@ -82,7 +88,7 @@ public class SendTextNotificationStartup : FunctionsStartup
 
         var client = new BlobServiceClient(
                         new Uri($"https://" + config?[Constant.StorageAccountName] + ".blob.core.windows.net/"),
-                        new DefaultAzureCredential());
+                        azureCredential);
         builder.Services.AddSingleton<IBlobStorageHelper, BlobStorageHelper>(x => new BlobStorageHelper(client));
 
         builder.Services.AddScoped<ITextNotificationHelper, TextNotificationHelper>();

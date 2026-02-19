@@ -13,11 +13,7 @@ namespace Notification.BL.Common.Interface
         /// Send Request to target REST endpoint
         /// </summary>
         /// <param name="method"></param>
-        /// <param name="clientId"></param>
-        /// <param name="clientKey"></param>
-        /// <param name="authority"></param>
         /// <param name="resourceUri"></param>
-        /// <param name="scope"></param>
         /// <param name="targetUri"></param>
         /// <param name="content"></param>
         /// <param name="headers"></param>
@@ -25,11 +21,7 @@ namespace Notification.BL.Common.Interface
         /// <returns></returns>
         Task<HttpResponseMessage> SendRequestAsync(
             HttpMethod method,
-            string clientId,
-            string clientKey,
-            string authority,
             string resourceUri,
-            string scope,
             string targetUri,
             string content = "",
             Dictionary<string, string> headers = null,

@@ -18,5 +18,13 @@ namespace Notification.BL.Common.Interface
         /// <param name="scope">Resource Uri</param>
         /// <returns>AuthenticationResult token</returns>
         Task<AuthenticationResult> GetAccessToken(string clientId, string appKey, string authority, string resource, string scope);
+
+        /// <summary>
+        /// Get OAuth 2.0 token generated using Managed Identity
+        /// </summary>
+        /// <param name="clientId">Client Id</param>
+        /// <param name="resourceUri">ResourceUri</param>
+        /// <returns>AuthenticationResult token</returns>
+        Task<string> GetManagedIdentityToken(string clientId, string resourceUri);
     }
 }

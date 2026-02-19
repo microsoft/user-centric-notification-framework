@@ -1,0 +1,57 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workflows_EmailNotification_name": {
+      "value": null
+    },
+    "resource_location": {
+      "value": null
+    },
+    "resource_location_code": {
+      "value": null
+    },
+    "resource_name_prefix": {
+      "value": null
+    },
+    "resource_env_suffix": {
+      "value": null
+    },
+    "subscription_id": {
+      "value": null
+    },
+    "active_directory_client_id": {
+      "value": null
+    },
+    "keyvault_secret_name": {
+      "value": null
+    },
+    "active_directory_resource": {
+      "value": null
+    },
+    "active_directory_tenant_id": {
+      "value": null
+    },
+    "connections_azuretables_name": {
+      "value": null
+    },
+    "connections_office365_name": {
+      "value": null
+    },
+    "connections_keyvault_name": {
+      "value": null
+    },
+    "functionapp_notificationcommonservices_name": {
+      "value": null
+    },
+    "functionapp_notificationcommonservices_secret": {
+      "value": null
+    },
+    "send_as_email": {
+      "value": null
+    },
+    "email_whitelist": {
+      "value": null
+    }
+  }
+}

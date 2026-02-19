@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ReleaseManagement", "ReleaseManagement", "{ACA6E327-D1D7-43B6-97D9-57F6C081F3D7}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Model", "Model", "{55ABCC46-1B05-4F65-8F1D-461C452AD73F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{296ACC98-D2AF-4877-8949-5769403CF3B8}"
@@ -13,7 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{DE
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "APIs", "APIs", "{920F83F8-938D-41C4-9E0D-20248FC79DF9}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{0AC0FD4B-F5F0-4794-8E22-32BB957F86E5}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0AC0FD4B-F5F0-4794-8E22-32BB957F86E5}"
+	ProjectSection(SolutionItems) = preProject
+		Tests\Notification.runsettings = Tests\Notification.runsettings
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{182FE290-92D5-4013-A2D3-DF8FCD57E86C}"
 EndProject
@@ -39,23 +40,19 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendR
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendTextNotification", "Services\Notification.Function.SendTextNotification\Notification.Function.SendTextNotification.csproj", "{73B49696-E98A-4E55-8886-89BD77D7AADD}"
 EndProject
-Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "Notification.LogicApp.Email", "Services\Notification.LogicApp.Email\Notification.LogicApp.Email.deployproj", "{55C14599-C0AF-4F68-8B03-0A70A86308AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.BL.Common.Test", "Tests\Notification.BL.Common.Test\Notification.BL.Common.Test.csproj", "{92D5B495-1692-4719-ACCD-41A4B0A4155C}"
 EndProject
-Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "Notification.LogicApp.Text", "Services\Notification.LogicApp.Text\Notification.LogicApp.Text.deployproj", "{DEE6E949-D327-49C8-91F8-C8F8DFF3BFA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendCustomNotification.Test", "Tests\Notification.Function.SendCustomNotification.Test\Notification.Function.SendCustomNotification.Test.csproj", "{0803C107-4E16-4E20-B9B9-2A2C91BEB420}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.BL.Common.Test", "Test\Notification.BL.Common.Test\Notification.BL.Common.Test.csproj", "{92D5B495-1692-4719-ACCD-41A4B0A4155C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendEmail.Test", "Tests\Notification.Function.SendEmail.Test\Notification.Function.SendEmail.Test.csproj", "{603344AB-B665-40B1-8D6F-3071B715ED4A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendCustomNotification.Test", "Test\Notification.Function.SendCustomNotification.Test\Notification.Function.SendCustomNotification.Test.csproj", "{0803C107-4E16-4E20-B9B9-2A2C91BEB420}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendEnterpriseEmail.Test", "Tests\Notification.Function.SendEnterpriseEmail.Test\Notification.Function.SendEnterpriseEmail.Test.csproj", "{B1CC46BD-4196-4366-A100-F518B3EA2500}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendEmail.Test", "Test\Notification.Function.SendEmail.Test\Notification.Function.SendEmail.Test.csproj", "{603344AB-B665-40B1-8D6F-3071B715ED4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendPushNotifications.Test", "Tests\Notification.Function.SendPushNotifications.Test\Notification.Function.SendPushNotifications.Test.csproj", "{A3D69177-8635-4DA8-93F5-D0686C8E9345}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendEnterpriseEmail.Test", "Test\Notification.Function.SendEnterpriseEmail.Test\Notification.Function.SendEnterpriseEmail.Test.csproj", "{B1CC46BD-4196-4366-A100-F518B3EA2500}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendReminders.Test", "Tests\Notification.Function.SendReminders.Test\Notification.Function.SendReminders.Test.csproj", "{4D4AB946-9481-455E-A0AD-346FFE940C5A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendPushNotifications.Test", "Test\Notification.Function.SendPushNotifications.Test\Notification.Function.SendPushNotifications.Test.csproj", "{A3D69177-8635-4DA8-93F5-D0686C8E9345}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendReminders.Test", "Test\Notification.Function.SendReminders.Test\Notification.Function.SendReminders.Test.csproj", "{4D4AB946-9481-455E-A0AD-346FFE940C5A}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendTextNotification.Test", "Test\Notification.Function.SendTextNotification.Test\Notification.Function.SendTextNotification.Test.csproj", "{623878FC-B396-4B5F-BA35-95F3068CFB89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendTextNotification.Test", "Tests\Notification.Function.SendTextNotification.Test\Notification.Function.SendTextNotification.Test.csproj", "{623878FC-B396-4B5F-BA35-95F3068CFB89}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Domain.BL.SendEmail", "Domain\Notification.Domain.BL.SendEmail\Notification.Domain.BL.SendEmail.csproj", "{87618FE4-8B6E-444E-99C8-5E4FEF597599}"
 EndProject
@@ -63,7 +60,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.SendE
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Data.Azure.Storage", "Core\Notification.Data.Azure.Storage\Notification.Data.Azure.Storage.csproj", "{EEC13F24-6179-4B96-AB63-792EECF1E947}"
 EndProject
-Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "ResourceTemplates", "ReleaseManagement\ResourceTemplates\ResourceTemplates.deployproj", "{35517850-664B-4BEB-BD2A-95D182C28880}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{B340E288-9B4B-4BFC-8B7C-7A5C995A8067}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{A1E3E17C-61FC-4AB8-9623-4BD2A6180CF3}"
 	ProjectSection(SolutionItems) = preProject
@@ -71,10 +68,43 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		..\SETUP.md = ..\SETUP.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Internal", "Internal", "{571B3A17-035F-45F7-AFB4-38407C4508F3}"
+	ProjectSection(SolutionItems) = preProject
+		Domain\Internal\ENTERPRISE_EMAIL_SETUP.md = Domain\Internal\ENTERPRISE_EMAIL_SETUP.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notification.Function.GetEmailNotificationStatus", "Domain\Internal\Services\Notification.Function.GetEmailNotificationStatus\Notification.Function.GetEmailNotificationStatus.csproj", "{100B29C4-054F-4C8E-A96E-23637313A161}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B7265FE6-0B9A-4999-BC11-9989B94877E6}"
 	ProjectSection(SolutionItems) = preProject
 		..\.gitignore = ..\.gitignore
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "arm", "arm", "{F439243D-37B5-4EC3-88EA-091985472711}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "logicapps", "logicapps", "{77DB0D54-AE65-439B-83B5-DDA37905CD5F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "email", "email", "{B5963F26-6723-408D-AB34-02EA012AF814}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "text", "text", "{4F2E2C5B-D4F8-4E16-8DFB-167E3C7DEFEE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared", "shared", "{1B00596B-9071-4FAF-A199-659036B6121D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{94727354-55BF-4BAE-9BBF-AE0D1A9252AE}"
+	ProjectSection(SolutionItems) = preProject
+		..\Infrastructure\pipelines\OneBranchTemplate.yml = ..\Infrastructure\pipelines\OneBranchTemplate.yml
+		..\Infrastructure\pipelines\UserCentricNotificationFramework-CI.yml = ..\Infrastructure\pipelines\UserCentricNotificationFramework-CI.yml
+		..\Infrastructure\pipelines\UserCentricNotificationFramework-Contract.yml = ..\Infrastructure\pipelines\UserCentricNotificationFramework-Contract.yml
+		..\Infrastructure\pipelines\UserCentricNotificationFramework.yml = ..\Infrastructure\pipelines\UserCentricNotificationFramework.yml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notification.LogicApp.Email", "..\Infrastructure\arm\logicapps\email\Notification.LogicApp.Email.csproj", "{55F6FFD1-FB02-4DFE-AE25-94998229F971}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Notification.LogicApp.Text", "..\Infrastructure\arm\logicapps\text\Notification.LogicApp.Text.csproj", "{9A1702EF-771A-4813-906A-6691E90910C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResourceTemplates", "..\Infrastructure\arm\shared\ResourceTemplates.csproj", "{B3652601-D816-4450-B6B6-38A271F3E1F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -126,14 +156,6 @@ Global
 		{73B49696-E98A-4E55-8886-89BD77D7AADD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{73B49696-E98A-4E55-8886-89BD77D7AADD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{73B49696-E98A-4E55-8886-89BD77D7AADD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{55C14599-C0AF-4F68-8B03-0A70A86308AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{55C14599-C0AF-4F68-8B03-0A70A86308AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{55C14599-C0AF-4F68-8B03-0A70A86308AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{55C14599-C0AF-4F68-8B03-0A70A86308AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DEE6E949-D327-49C8-91F8-C8F8DFF3BFA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DEE6E949-D327-49C8-91F8-C8F8DFF3BFA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DEE6E949-D327-49C8-91F8-C8F8DFF3BFA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DEE6E949-D327-49C8-91F8-C8F8DFF3BFA1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{92D5B495-1692-4719-ACCD-41A4B0A4155C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{92D5B495-1692-4719-ACCD-41A4B0A4155C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92D5B495-1692-4719-ACCD-41A4B0A4155C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -174,10 +196,22 @@ Global
 		{EEC13F24-6179-4B96-AB63-792EECF1E947}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EEC13F24-6179-4B96-AB63-792EECF1E947}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EEC13F24-6179-4B96-AB63-792EECF1E947}.Release|Any CPU.Build.0 = Release|Any CPU
-		{35517850-664B-4BEB-BD2A-95D182C28880}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{35517850-664B-4BEB-BD2A-95D182C28880}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{35517850-664B-4BEB-BD2A-95D182C28880}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{35517850-664B-4BEB-BD2A-95D182C28880}.Release|Any CPU.Build.0 = Release|Any CPU
+		{100B29C4-054F-4C8E-A96E-23637313A161}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{100B29C4-054F-4C8E-A96E-23637313A161}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{100B29C4-054F-4C8E-A96E-23637313A161}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{100B29C4-054F-4C8E-A96E-23637313A161}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55F6FFD1-FB02-4DFE-AE25-94998229F971}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55F6FFD1-FB02-4DFE-AE25-94998229F971}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55F6FFD1-FB02-4DFE-AE25-94998229F971}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55F6FFD1-FB02-4DFE-AE25-94998229F971}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A1702EF-771A-4813-906A-6691E90910C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A1702EF-771A-4813-906A-6691E90910C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A1702EF-771A-4813-906A-6691E90910C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A1702EF-771A-4813-906A-6691E90910C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3652601-D816-4450-B6B6-38A271F3E1F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3652601-D816-4450-B6B6-38A271F3E1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3652601-D816-4450-B6B6-38A271F3E1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3652601-D816-4450-B6B6-38A271F3E1F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -194,8 +228,6 @@ Global
 		{BBB311F6-35F6-47FB-BE55-1B4EA4AA6B93} = {DE8FD34C-2AF0-41BC-8068-F7FE08B644B9}
 		{871CBA99-5996-48F9-A4D7-B2E072D8F6D7} = {DE8FD34C-2AF0-41BC-8068-F7FE08B644B9}
 		{73B49696-E98A-4E55-8886-89BD77D7AADD} = {DE8FD34C-2AF0-41BC-8068-F7FE08B644B9}
-		{55C14599-C0AF-4F68-8B03-0A70A86308AB} = {DE8FD34C-2AF0-41BC-8068-F7FE08B644B9}
-		{DEE6E949-D327-49C8-91F8-C8F8DFF3BFA1} = {DE8FD34C-2AF0-41BC-8068-F7FE08B644B9}
 		{92D5B495-1692-4719-ACCD-41A4B0A4155C} = {0AC0FD4B-F5F0-4794-8E22-32BB957F86E5}
 		{0803C107-4E16-4E20-B9B9-2A2C91BEB420} = {0AC0FD4B-F5F0-4794-8E22-32BB957F86E5}
 		{603344AB-B665-40B1-8D6F-3071B715ED4A} = {0AC0FD4B-F5F0-4794-8E22-32BB957F86E5}
@@ -206,7 +238,18 @@ Global
 		{87618FE4-8B6E-444E-99C8-5E4FEF597599} = {182FE290-92D5-4013-A2D3-DF8FCD57E86C}
 		{16B38350-77F6-4076-B4DE-527B27C24420} = {DE8FD34C-2AF0-41BC-8068-F7FE08B644B9}
 		{EEC13F24-6179-4B96-AB63-792EECF1E947} = {296ACC98-D2AF-4877-8949-5769403CF3B8}
-		{35517850-664B-4BEB-BD2A-95D182C28880} = {ACA6E327-D1D7-43B6-97D9-57F6C081F3D7}
+		{B340E288-9B4B-4BFC-8B7C-7A5C995A8067} = {571B3A17-035F-45F7-AFB4-38407C4508F3}
+		{571B3A17-035F-45F7-AFB4-38407C4508F3} = {182FE290-92D5-4013-A2D3-DF8FCD57E86C}
+		{100B29C4-054F-4C8E-A96E-23637313A161} = {B340E288-9B4B-4BFC-8B7C-7A5C995A8067}
+		{F439243D-37B5-4EC3-88EA-091985472711} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{77DB0D54-AE65-439B-83B5-DDA37905CD5F} = {F439243D-37B5-4EC3-88EA-091985472711}
+		{B5963F26-6723-408D-AB34-02EA012AF814} = {77DB0D54-AE65-439B-83B5-DDA37905CD5F}
+		{4F2E2C5B-D4F8-4E16-8DFB-167E3C7DEFEE} = {77DB0D54-AE65-439B-83B5-DDA37905CD5F}
+		{1B00596B-9071-4FAF-A199-659036B6121D} = {F439243D-37B5-4EC3-88EA-091985472711}
+		{94727354-55BF-4BAE-9BBF-AE0D1A9252AE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{55F6FFD1-FB02-4DFE-AE25-94998229F971} = {B5963F26-6723-408D-AB34-02EA012AF814}
+		{9A1702EF-771A-4813-906A-6691E90910C1} = {4F2E2C5B-D4F8-4E16-8DFB-167E3C7DEFEE}
+		{B3652601-D816-4450-B6B6-38A271F3E1F2} = {1B00596B-9071-4FAF-A199-659036B6121D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D4611A57-74B2-4092-9B59-F25EAB73FB04}

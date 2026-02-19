@@ -20,10 +20,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="12.8.1" />
-    <PackageReference Include="NCrontab.Signed" Version="3.3.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    <PackageReference Include="System.Text.Encodings.Web" Version="7.0.0" />
+    <PackageReference Include="Azure.Data.Tables" />
+    <PackageReference Include="NCrontab.Signed" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="System.ComponentModel.Annotations" />
+    <PackageReference Include="System.Text.Encodings.Web" />
   </ItemGroup>
 </Project>

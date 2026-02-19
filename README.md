@@ -46,13 +46,15 @@ Apart from these keep the following items handy as it would be required during d
   > 
   > Microsoft Entra ID App's Secret
 
+- User Assigned Managed Identity's Client Id
+
 
 ### Installing
 
 A step by step series of that explains how to get the components deployed in Azure
 
 ```
-Step 1: Download the ARM template (azuredeploy.json) from the source (Code\ReleaseManagement\ResourceTemplates folder)
+Step 1: Download the ARM template [azuredeploy.json](Infrastructure/arm/shared/azuredeploy.json) from the source
 ```
 
 ```
@@ -126,10 +128,8 @@ Once all the components are deployed, go to the below components, copy the acces
 | NotificationHubDefaultFullSharedAccessSignature | Azure Notification Hub | Yes | Device Push |
 | HubName | Azure Notification Hub | No | Device Push |
 | MustUpdateConfig |  | No | Common |
-| IdentityProviderClientId | Microsoft Entra ID | No | Common |
-| IdentityProviderAppKey | Microsoft Entra ID | Yes | Common |
-| IdentityProviderAuthority | Microsoft Entra ID | No | Common |
 | IdentityProviderResource | Microsoft Entra ID | No | Common |
+| ManagedIdentityClientId | Managed Identity | No | Common |
 | WebPushNotificationRegistrationTableName |  | No | Web Push |
 | DeviceNotificationTemplatesTableName |  | No | Device Push |
 | MailQueueName | ServiceBus Queue | No | Email |
@@ -171,14 +171,14 @@ Once all the components are deployed, go to the below components, copy the acces
 * Authorize the API connections (for Logic Apps)
   * Outlook - with the account that will be sending emails, 
   * Twilio
-  * Key Vault - with Managed Idenity of the Logic App
-  * Storage - with Managed Idenity of the Logic App
+  * Key Vault - with Managed Identity of the Logic App
+  * Storage - with Managed Identity of the Logic App
     ```
     Note: For your personal outlook account, please add a new outlook (Send an Email(V2)) task instead of Office 365, 
     and fill all the parameters as if in the existing Send an Email task.
     ```
 * Setup AuthN for APIs and Function Apps
-  * Update the Reply Urls section of the Microsoft Entra ID App created earlier with the URLs of the App Services and FunctionApps (HttpTriggered) URLs suffixed with '/auth/login/aad/callback' 
+  * Update the Reply URLs section of the Microsoft Entra ID App created earlier with the URLs of the App Services and FunctionApps (HttpTriggered) URLs suffixed with '/auth/login/aad/callback' 
   * In the 'Authentication' section of the AppServices / FunctionApps (HttpTriggered),
     * Add or update the Authentication values (ClientId/Secret/Issuer/Audience)
     * Select 'Return HTTP 302 Found (Redirect to identity provider)' for the option 'Unauthenticated requests'
@@ -194,7 +194,7 @@ Once all the components are deployed, go to the below components, copy the acces
     
     > appid
     
-        Use 'IdentityProviderClientId' value
+        Use 'ManagedIdentityClientId' value
 
 ## Local Setup
 Configure the following package sources in VS to restore NuGet packages:
@@ -210,8 +210,6 @@ If the issue persists, add the following AppSettings in the service configuratio
 ```
     "MSDEPLOY_RENAME_LOCKED_FILES": "1"
 ```
-
-- Reference Release [Pipeline](https://microsoftit.visualstudio.com/OneITVSO/_release?_a=releases&view=mine&definitionId=13611) 
 
 ## How to Setup to use this framework
 

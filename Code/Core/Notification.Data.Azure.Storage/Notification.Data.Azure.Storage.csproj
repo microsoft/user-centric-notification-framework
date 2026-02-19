@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="12.8.1" />
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.17.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
+    <PackageReference Include="Azure.Data.Tables" />
+    <PackageReference Include="Azure.Storage.Blobs" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" />
   </ItemGroup>
 
 </Project>
