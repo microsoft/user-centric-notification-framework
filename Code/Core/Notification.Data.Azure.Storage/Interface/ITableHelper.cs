@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
@@ -35,9 +36,9 @@ namespace Notification.Data.Azure.Storage.Interface
 
         List<T> GetTableEntityByPartitionKeyAndField<T>(string TableName, string PartitionKey, string fieldName, string fieldValue) where T : class, ITableEntity, new();
 
-        List<T> GetDataCollectionByTableQuery<T>(string TableName, string query) where T : class, ITableEntity, new();
+        List<T> GetDataCollectionByTableQuery<T>(string TableName, FormattableString query) where T : class, ITableEntity, new();
 
-        List<T> GetDataCollectionByTableQuerySegmented<T>(string TableName, string query) where T : class, ITableEntity, new();
+        List<T> GetDataCollectionByTableQuerySegmented<T>(string TableName, FormattableString query) where T : class, ITableEntity, new();
 
         Task InsertOrReplaceRows<T>(string TableName, List<T> entities, bool caseConstraint = false) where T : class, ITableEntity, new();
 
