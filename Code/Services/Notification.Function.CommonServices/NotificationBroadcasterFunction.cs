@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BL.Common;
 using BL.Common.Extension;
@@ -26,6 +27,9 @@ using Notification.Model.Model;
 /// </summary>
 public class NotificationBroadcasterFunction
 {
+    private static readonly Regex AliasRegex =
+        new("^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     private readonly INotificationHelper _notificationHelper;
     private readonly IAuthorizationMiddleware _authService;
 
@@ -75,6 +79,19 @@ public class NotificationBroadcasterFunction
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var data = JsonConvert.DeserializeObject<NotificationItem>(requestBody);
 
+            if (data?.NotificationTypes?.Contains(NotificationType.Text) == true && !IsValidAlias(data.To))
+            {
+                logData.EventDetails.Modify(Constant.AppAction, "Notification - Broadcaster - Failed - Invalid Text Alias");
+                logData.EventDetails.Modify(Constant.To, $"{data.To}");
+                using (logger.BeginScope(logData.EventDetails))
+                {
+                    logger.LogWarning(new EventId((int)EventIds.NotificationBroadcasterFailed),
+                        "Notification - Broadcaster - Failed - Invalid Text Alias");
+                }
+
+                return new BadRequestObjectResult("Invalid 'to' alias for Text notification.");
+            }
+
             logData.EventDetails.Modify(Constant.ApplicationName, $"{data.ApplicationName}");
             logData.EventDetails.Modify(Constant.TenantIdentifier, $"{data.TenantIdentifier}");
             logData.EventDetails.Modify(Constant.Xcv, $"{data.Telemetry?.Xcv}");
@@ -117,4 +134,7 @@ public class NotificationBroadcasterFunction
             return new BadRequestObjectResult(ex.Message);
         }
     }
+
+    private static bool IsValidAlias(string alias) =>
+        !string.IsNullOrWhiteSpace(alias) && AliasRegex.IsMatch(alias);
 }

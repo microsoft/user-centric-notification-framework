@@ -307,7 +307,7 @@
                 "method": "get",
                 "path": "/Tables/@{encodeURIComponent('UserPreferenceSetting')}/entities",
                 "queries": {
-                  "$filter": "@{concat('PartitionKey eq ''', triggerBody()?['to'], '''')}",
+                  "$filter": "@{concat('PartitionKey eq ''', replace(triggerBody()?['to'],'''',''''''), '''')}",
                   "$select": "PhoneNumber"
                 }
               }
