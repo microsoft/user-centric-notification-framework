@@ -7,9 +7,11 @@ using System;
 using System.Linq;
 using System.Net.Mail;
 using BL.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
+[Authorize]
 public class BaseController : ControllerBase
 {
     protected string Alias { get; set; }

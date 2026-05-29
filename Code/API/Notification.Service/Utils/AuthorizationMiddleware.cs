@@ -53,7 +53,7 @@ public class AuthorizationMiddleware : IMiddleware
 
             if (context.User != null)
             {
-                var appid = context.User.Claims.FirstOrDefault(c => c.Type.Equals("appid")) ?? context.User.Claims.FirstOrDefault(c => c.Type.Equals("aud"));
+                var appid = context.User.Claims.FirstOrDefault(c => c.Type.Equals("appid")) ?? context.User.Claims.FirstOrDefault(c => c.Type.Equals("azp"));
 
                 // if AppId is null or the AppId fetched from claims is different from the Valid AppId list value then return UnAuthorized Response
                 if (appid == null || !listOfValidAppIds.Any(id => id.Equals(appid.Value, StringComparison.InvariantCultureIgnoreCase)))
