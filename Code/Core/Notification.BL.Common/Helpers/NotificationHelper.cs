@@ -229,12 +229,12 @@ namespace Notification.BL.Common.Helpers
         #region Private Methods
 
         /// <summary>
-        /// To update the mail status in Azure notification status table for scheduled email
+        /// To update the status in Azure notification status table for scheduled messages
         /// </summary>
         /// <param name="isSucccessfullySent"></param>
         /// <param name="item"></param>
         /// <returns></returns>
-        private async Task UpdateScheduledMailStatusInTable(bool isSucccessfullySent, NotificationItem item, string queue)
+        private async Task UpdateScheduledStatusInTable(bool isSucccessfullySent, NotificationItem item, string queue)
         {
             if (isSucccessfullySent)
             {
@@ -310,10 +310,12 @@ namespace Notification.BL.Common.Helpers
                     {
                         (isSucccessfullySent, item.SequenceNumber) = await SendMessage(failedQueuesInformation, logData, message, queue);
 
-                        //To handle scheduled email message
-                        if (queue.Equals(_config[Constant.MailQueueName], StringComparison.InvariantCultureIgnoreCase) && item.SequenceNumber > 0)
+                        // To handle scheduled email message
+                        if ((queue.Equals(_config[Constant.MailQueueName], StringComparison.InvariantCultureIgnoreCase)
+                            || queue.Equals(Constant.ReminderQueueName, StringComparison.InvariantCultureIgnoreCase))
+                            && item.SequenceNumber > 0)
                         {
-                            await UpdateScheduledMailStatusInTable(isSucccessfullySent, item, _config[Constant.MailQueueName]);
+                            await UpdateScheduledStatusInTable(isSucccessfullySent, item, queue);
                         }
                     }
 
@@ -322,6 +324,10 @@ namespace Notification.BL.Common.Helpers
                     {
                         message.ScheduledEnqueueTime = item.Reminder.NextReminderDate;
                         (isSucccessfullySent, item.SequenceNumber) = await SendMessage(failedQueuesInformation, logData, message, Constant.ReminderQueueName);
+                        if (item.SequenceNumber > 0)
+                        {
+                            await UpdateScheduledStatusInTable(isSucccessfullySent, item, Constant.ReminderQueueName);
+                        }
                     }
                     else
                     {

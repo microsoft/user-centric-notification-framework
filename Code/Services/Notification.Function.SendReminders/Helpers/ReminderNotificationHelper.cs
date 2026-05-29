@@ -68,9 +68,30 @@ public class ReminderNotificationHelper : IReminderNotificationHelper
             // Set default response
             HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.BadRequest);
 
+            if (notificationItem?.Reminder == null)
+            {
+                throw new InvalidOperationException("Reminder details are required.");
+            }
+
+            if (!notificationItem.Reminder.IsFrequencyValid())
+            {
+                throw new InvalidOperationException($"Reminder frequency must be at least {ReminderDetail.MinimumFrequencyInHours} hour.");
+            }
+
+            if (!notificationItem.Reminder.IsExpirationWithinWindow(DateTime.UtcNow))
+            {
+                throw new InvalidOperationException($"Reminder expirationDate must be within {ReminderDetail.MaximumExpirationWindowInDays} days from now.");
+            }
+
+            if (notificationItem.Reminder.HasReachedHardIterationCap())
+            {
+                throw new InvalidOperationException($"Reminder iteration limit of {ReminderDetail.HardIterationCap} reached.");
+            }
+
             // Update payload to send only specific notifications for reminders
             notificationItem.NotificationTypes = notificationItem.Reminder.NotificationTypes;
             notificationItem.Subject = !notificationItem.Subject.StartsWith("Reminder") ? $"Reminder: {notificationItem.Subject}" : notificationItem.Subject;
+            notificationItem.Reminder.IterationCount++;
 
             // Send request
             response = await _httpHelper.SendRequestAsync(HttpMethod.Post, string.Empty, _functionUrl, JsonConvert.SerializeObject(notificationItem));
