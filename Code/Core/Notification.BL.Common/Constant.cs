@@ -40,7 +40,7 @@ namespace Notification.BL.Common
         public const string CompanyName = "Microsoft";
         public const string Bearer = "Bearer";
         public const string ApplicationJson = "application/json";
-        public const string UserPrincipalName = "UserPrincipalName";
+        public const string UserPrincipalName = "X-MS-CLIENT-PRINCIPAL-NAME";
         public const string VapidDetails = "vapidDetails";
         public const string TTL = "TTL";
         public const string EndPoint = "EndPoint";

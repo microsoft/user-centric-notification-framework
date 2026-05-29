@@ -211,6 +211,10 @@ namespace Notification.Contract
     /// </summary>
     public class ReminderDetail
     {
+        public const int HardIterationCap = 30;
+        public const double MinimumFrequencyInHours = 1;
+        public const int MaximumExpirationWindowInDays = 30;
+
         /// <summary>
         /// Gets or sets the type of the notification.
         /// </summary>
@@ -228,6 +232,12 @@ namespace Notification.Contract
         /// </summary>
         [JsonProperty("frequency")]
         public double Frequency { get; set; }
+
+        /// <summary>
+        /// Gets or sets reminder iteration count.
+        /// </summary>
+        [JsonProperty("iterationCount")]
+        public int IterationCount { get; set; }
 
         /// <summary>
         /// Reminder Expiration Date.
@@ -253,6 +263,34 @@ namespace Notification.Contract
                     return (date != null && date <= ExpirationDate) ? (DateTime)date : DateTime.MinValue;
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks if the reminder's frequency is valid as per the defined constraints.
+        /// </summary>
+        /// <returns>True if the reminder's frequency is valid, otherwise false.</returns>
+        public bool IsFrequencyValid()
+        {
+            return Frequency <= 0 || Frequency >= MinimumFrequencyInHours;
+        }
+
+        /// <summary>
+        /// Checks if the reminder's expiration date is within the allowed window.
+        /// </summary>
+        /// <param name="utcNow">The current UTC time.</param>
+        /// <returns>True if the expiration date is within the allowed window, otherwise false.</returns>
+        public bool IsExpirationWithinWindow(DateTime utcNow)
+        {
+            return ExpirationDate <= utcNow.AddDays(MaximumExpirationWindowInDays);
+        }
+
+        /// <summary>
+        /// Checks if the reminder has reached the hard iteration cap.
+        /// </summary>
+        /// <returns>True if the hard iteration cap is reached, otherwise false.</returns>
+        public bool HasReachedHardIterationCap()
+        {
+            return IterationCount >= HardIterationCap;
         }
     }
 

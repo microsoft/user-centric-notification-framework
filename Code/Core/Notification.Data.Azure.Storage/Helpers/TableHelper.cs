@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Data.Tables;
@@ -18,6 +20,16 @@ namespace Notification.Data.Azure.Storage.Helpers
     /// </summary>
     public class TableHelper : ITableHelper
     {
+        private static readonly Regex FieldNameRegex = new Regex("^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        private static readonly HashSet<string> AllowedComparisonOperators = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "eq", "ne", "gt", "ge", "lt", "le"
+        };
+        private static readonly HashSet<string> AllowedLogicalOperators = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "and", "or"
+        };
+
         private readonly string _azureStorageAccountName;
         private readonly TokenCredential _tokenCredential;
 
@@ -63,7 +75,7 @@ namespace Notification.Data.Azure.Storage.Helpers
         public T GetTableEntityByRowKey<T>(string TableName, string rowKey) where T : class, ITableEntity, new()
         {
             TableClient tableClient = CreateTableClient(TableName);
-            return tableClient.Query<T>(filter: $"RowKey eq '{rowKey}'").FirstOrDefault();
+            return tableClient.Query<T>(entity => entity.RowKey == rowKey).FirstOrDefault();
         }
 
         /// <summary>
@@ -76,7 +88,7 @@ namespace Notification.Data.Azure.Storage.Helpers
         public T GetTableEntityByPartitionKey<T>(string TableName, string PartitionKey) where T : class, ITableEntity, new()
         {
             TableClient tableClient = CreateTableClient(TableName);
-            return tableClient.Query<T>(filter: $"PartitionKey eq '{PartitionKey}'").FirstOrDefault();
+            return tableClient.Query<T>(entity => entity.PartitionKey == PartitionKey).FirstOrDefault();
         }
 
         /// <summary>
@@ -89,7 +101,7 @@ namespace Notification.Data.Azure.Storage.Helpers
         public List<T> GetTableEntityListByRowKey<T>(string TableName, string RowKey) where T : class, ITableEntity, new()
         {
             TableClient tableClient = CreateTableClient(TableName);
-            return tableClient.Query<T>(filter: $"RowKey eq '{RowKey}'").ToList();
+            return tableClient.Query<T>(entity => entity.RowKey == RowKey).ToList();
         }
 
         /// <summary>
@@ -102,7 +114,7 @@ namespace Notification.Data.Azure.Storage.Helpers
         public List<T> GetTableEntityListByPartitionKey<T>(string TableName, string PartitionKey) where T : class, ITableEntity, new()
         {
             TableClient tableClient = CreateTableClient(TableName);
-            return tableClient.Query<T>(filter: $"PartitionKey eq '{PartitionKey}'").ToList();
+            return tableClient.Query<T>(entity => entity.PartitionKey == PartitionKey).ToList();
         }
 
         /// <summary>
@@ -116,7 +128,10 @@ namespace Notification.Data.Azure.Storage.Helpers
         public T GetTableEntityByfield<T>(string TableName, string fieldName, string fieldValue) where T : class, ITableEntity, new()
         {
             TableClient tableClient = CreateTableClient(TableName);
-            Pageable<T> queryResultsFilter = tableClient.Query<T>(filter: $"{fieldName} eq '{fieldValue}'");
+            string fieldNameToken = GetODataIdentifierToken(fieldName);
+            FormattableString queryFormattableString = FormattableStringFactory.Create($"{fieldNameToken} eq {{0}}", fieldValue);
+            string filter = TableClient.CreateQueryFilter(queryFormattableString);
+            Pageable<T> queryResultsFilter = tableClient.Query<T>(filter: filter);
             return queryResultsFilter.FirstOrDefault();
         }
 
@@ -131,7 +146,10 @@ namespace Notification.Data.Azure.Storage.Helpers
         public List<T> GetTableEntityListByfield<T>(string TableName, string fieldName, string fieldValue) where T : class, ITableEntity, new()
         {
             TableClient tableClient = CreateTableClient(TableName);
-            Pageable<T> queryResultsFilter = tableClient.Query<T>(filter: $"{fieldName} eq '{fieldValue}'");
+            string fieldNameToken = GetODataIdentifierToken(fieldName);
+            FormattableString queryFormattableString = FormattableStringFactory.Create($"{fieldNameToken} eq {{0}}", fieldValue);
+            string filter = TableClient.CreateQueryFilter(queryFormattableString);
+            Pageable<T> queryResultsFilter = tableClient.Query<T>(filter: filter);
             return queryResultsFilter?.ToList();
         }
 
@@ -160,7 +178,7 @@ namespace Notification.Data.Azure.Storage.Helpers
         public List<T> GetTableEntityListByPartitionKeyAndRowKey<T>(string TableName, string PartitionKey, string RowKey) where T : class, ITableEntity, new()
         {
             TableClient tableClient = CreateTableClient(TableName);
-            return tableClient.Query<T>(filter: $"PartitionKey eq '{PartitionKey}' and RowKey eq '{RowKey}'")?.ToList();
+            return tableClient.Query<T>(entity => entity.PartitionKey == PartitionKey && entity.RowKey == RowKey)?.ToList();
         }
 
         /// <summary>
@@ -260,7 +278,11 @@ namespace Notification.Data.Azure.Storage.Helpers
         public List<T> GetTableEntityByPartitionKeyAndField<T>(string TableName, string PartitionKey, string fieldName, string fieldValue) where T : class, ITableEntity, new()
         {
             TableClient tableClient = CreateTableClient(TableName);
-            Pageable<T> queryResultsFilter = tableClient.Query<T>(filter: $"PartitionKey eq '{PartitionKey}' and {fieldName} eq '{fieldValue}'");
+            string partitionKeyToken = GetODataIdentifierToken(nameof(ITableEntity.PartitionKey));
+            string fieldNameToken = GetODataIdentifierToken(fieldName);
+            FormattableString queryFormattableString = FormattableStringFactory.Create($"{partitionKeyToken} eq {{0}} and {fieldNameToken} eq {{1}}", PartitionKey, fieldValue);
+            string filter = TableClient.CreateQueryFilter(queryFormattableString);
+            Pageable<T> queryResultsFilter = tableClient.Query<T>(filter: filter);
             return queryResultsFilter?.ToList();
         }
 
@@ -271,10 +293,10 @@ namespace Notification.Data.Azure.Storage.Helpers
         /// <param name="TableName"></param>
         /// <param name="query"></param>
         /// <returns></returns>
-        public List<T> GetDataCollectionByTableQuery<T>(string TableName, string query) where T : class, ITableEntity, new()
+        public List<T> GetDataCollectionByTableQuery<T>(string TableName, FormattableString query) where T : class, ITableEntity, new()
         {
             TableClient tableClient = CreateTableClient(TableName);
-            return tableClient.Query<T>(filter: query)?.ToList();
+            return tableClient.Query<T>(filter: TableClient.CreateQueryFilter(query))?.ToList();
         }
 
         /// <summary>
@@ -284,14 +306,15 @@ namespace Notification.Data.Azure.Storage.Helpers
         /// <param name="TableName"></param>
         /// <param name="query"></param>
         /// <returns></returns>
-        public List<T> GetDataCollectionByTableQuerySegmented<T>(string TableName, string query) where T : class, ITableEntity, new()
+        public List<T> GetDataCollectionByTableQuerySegmented<T>(string TableName, FormattableString query) where T : class, ITableEntity, new()
         {
             List<T> result = new List<T>();
             TableClient tableClient = CreateTableClient(TableName);
             string continuationToken = null;
+            string filter = TableClient.CreateQueryFilter(query);
             do
             {
-                var responseList = tableClient.Query<T>(filter: query);
+                var responseList = tableClient.Query<T>(filter: filter);
                 foreach (var response in responseList.AsPages())
                 {
                     continuationToken = response.ContinuationToken;
@@ -315,7 +338,17 @@ namespace Notification.Data.Azure.Storage.Helpers
         public List<T> GetDataCollectionByColumns<T>(string TableName, KeyValuePair<string, string> columnOne, string columnOneQComparison, string tableOperator, KeyValuePair<string, string> columnTwo, string columnTwoQComparison) where T : class, ITableEntity, new()
         {
             TableClient tableClient = CreateTableClient(TableName);
-            var query = tableClient.Query<T>(filter: $"{columnOne.Key.ToString(CultureInfo.InvariantCulture)} {columnOneQComparison} '{columnOne.Value.ToString(CultureInfo.InvariantCulture)}' {tableOperator} {columnTwo.Key.ToString(CultureInfo.InvariantCulture)} {columnTwoQComparison} '{columnTwo.Value.ToString(CultureInfo.InvariantCulture)}'");
+            string leftFieldToken = GetODataIdentifierToken(columnOne.Key.ToString(CultureInfo.InvariantCulture));
+            string rightFieldToken = GetODataIdentifierToken(columnTwo.Key.ToString(CultureInfo.InvariantCulture));
+            string leftComparison = GetComparisonOperator(columnOneQComparison);
+            string rightComparison = GetComparisonOperator(columnTwoQComparison);
+            string logicalOperator = GetLogicalOperator(tableOperator);
+
+            FormattableString queryFormattableString = FormattableStringFactory.Create($"{leftFieldToken} {leftComparison} {{0}} {logicalOperator} {rightFieldToken} {rightComparison} {{1}}",
+                columnOne.Value.ToString(CultureInfo.InvariantCulture),
+                columnTwo.Value.ToString(CultureInfo.InvariantCulture));
+
+            var query = tableClient.Query<T>(filter: TableClient.CreateQueryFilter(queryFormattableString));
             return query.ToList();
         }
 
@@ -377,6 +410,55 @@ namespace Notification.Data.Azure.Storage.Helpers
             Entity.ETag = ETag.All;
             var response = await tableClient.UpdateEntityAsync(Entity, ETag.All, TableUpdateMode.Merge);
             return !response.IsError;
+        }
+
+        /// <summary>
+        /// Validates and returns the OData identifier token for the specified field name.
+        /// </summary>
+        /// <param name="fieldName">The field name to validate.</param>
+        /// <returns>The OData identifier token for the specified field name.</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="fieldName"/> is null, whitespace, or not a valid field name.</exception>
+        private static string GetODataIdentifierToken(string fieldName)
+        {
+            if (string.IsNullOrWhiteSpace(fieldName) || !FieldNameRegex.IsMatch(fieldName))
+            {
+                throw new ArgumentException("Invalid field name for query filter.", nameof(fieldName));
+            }
+
+            return $"[{fieldName}]";
+        }
+
+        /// <summary>
+        /// Validates and returns the specified comparison operator.
+        /// </summary>
+        /// <param name="comparisonOperator">The comparison operator to validate.</param>
+        /// <returns>The validated comparison operator.</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="comparisonOperator"/> is null, whitespace, or not in the list of allowed comparison operators.</exception>
+        private static string GetComparisonOperator(string comparisonOperator)
+        {
+            if (string.IsNullOrWhiteSpace(comparisonOperator) || !AllowedComparisonOperators.Contains(comparisonOperator))
+            {
+                throw new ArgumentException("Invalid comparison operator for query filter.", nameof(comparisonOperator));
+            }
+
+            return comparisonOperator;
+        }
+
+        /// <summary>
+        /// Validates and returns the specified logical operator.
+        /// </summary>
+        /// <param name="tableOperator">The logical operator to validate.</param>
+        /// <returns>The validated logical operator.</returns>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="tableOperator"/> is null, whitespace, or not in the list of allowed logical
+        /// operators.</exception>
+        private static string GetLogicalOperator(string tableOperator)
+        {
+            if (string.IsNullOrWhiteSpace(tableOperator) || !AllowedLogicalOperators.Contains(tableOperator))
+            {
+                throw new ArgumentException("Invalid logical operator for query filter.", nameof(tableOperator));
+            }
+
+            return tableOperator;
         }
     }
 }

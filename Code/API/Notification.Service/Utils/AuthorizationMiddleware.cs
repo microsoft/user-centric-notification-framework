@@ -53,7 +53,7 @@ public class AuthorizationMiddleware : IMiddleware
 
             if (context.User != null)
             {
-                var appid = context.User.Claims.FirstOrDefault(c => c.Type.Equals("appid")) ?? context.User.Claims.FirstOrDefault(c => c.Type.Equals("aud"));
+                var appid = context.User.Claims.FirstOrDefault(c => c.Type.Equals("appid")) ?? context.User.Claims.FirstOrDefault(c => c.Type.Equals("azp"));
 
                 // if AppId is null or the AppId fetched from claims is different from the Valid AppId list value then return UnAuthorized Response
                 if (appid == null || !listOfValidAppIds.Any(id => id.Equals(appid.Value, StringComparison.InvariantCultureIgnoreCase)))
@@ -65,6 +65,13 @@ public class AuthorizationMiddleware : IMiddleware
             }
 
             #endregion Check for Valid AppID
+        }
+        else
+        {
+            // If the request doesn't have the required headers added by App Service Authentication (EasyAuth) then return UnAuthorized Response
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await context.Response.WriteAsync("Unauthorized request");
+            return;
         }
 
         await next(context);

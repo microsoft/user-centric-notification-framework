@@ -62,7 +62,7 @@ public class PushNotificationRegistrationController : BaseController
             }
 
             // Get registration
-            var registrations = await _pushNotificationRegistration.GetRegistrationInfo();
+            var registrations = await _pushNotificationRegistration.GetRegistrationInfo(Alias);
 
             // Log Success
             logData.EventDetails.Modify(Constant.AppAction, "Notification - Registration - Device Push - GET - Success");
@@ -233,7 +233,7 @@ public class PushNotificationRegistrationController : BaseController
             }
 
             // Delete registration
-            await _pushNotificationRegistration.DeleteRegistration(id);
+            await _pushNotificationRegistration.DeleteRegistration(Alias, id);
 
             // Log Success
             logData.EventDetails.Modify(Constant.AppAction, "Notification - Registration - Device Push - DELETE - Success");

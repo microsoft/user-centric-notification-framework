@@ -5,6 +5,7 @@ namespace Notification.Function.SendPushNotifications.Helpers;
 
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BL.Common;
 using BL.Common.Extension;
@@ -21,6 +22,11 @@ using WebPush;
 
 public class PushNotificationHelper : IPushNotificationHelper
 {
+    private static readonly Regex NotificationToRegex =
+        new("^[A-Za-z0-9_@.-]{1,120}$", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex InvalidTagExpressionCharactersRegex =
+        new("[\\s\\|&!()]", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     private readonly IConfiguration _config;
     private readonly ILogger _logger;
     private readonly string _vapidPublicKey;
@@ -183,6 +189,19 @@ public class PushNotificationHelper : IPushNotificationHelper
             }
         };
 
+        if (!IsValidNotificationTarget(notificationItem?.To))
+        {
+            logData.EventDetails.Modify(Constant.AppAction, "Notification - ProcessDevicePushNotificationRequestsAsync - Failed - Invalid To");
+            using (_logger.BeginScope(logData.EventDetails))
+            {
+                _logger.LogError(new EventId((int)EventIds.SendDevicePushNotificationError),
+                    new InvalidOperationException("Invalid notification target alias."),
+                    "Notification - ProcessDevicePushNotificationRequestsAsync - Failed - Invalid To");
+            }
+
+            return;
+        }
+
         foreach (var notificationType in notificationItem.NotificationTypes)
         {
             try
@@ -192,11 +211,12 @@ public class PushNotificationHelper : IPushNotificationHelper
                 foreach (var item in templateContent)
                 {
                     var payload = _notificationHelper.Replace(null, notificationItem.TemplateData, item.TemplateContent);
+                    var deviceTag = $"{notificationItem.To}{notificationType}";
                     switch (item.RowKey)
                     {
                         case "wns":
                             // Windows 8.1 / Windows Phone 8.1 / Windows 10
-                            NotificationOutcome wnsOutcome = await _hub.SendWindowsNativeNotificationAsync(payload, notificationItem.To + notificationType);
+                            NotificationOutcome wnsOutcome = await _hub.SendWindowsNativeNotificationAsync(payload, new[] { deviceTag });
 
                             // Log success
                             logData.EventDetails.Modify(Constant.AppAction, "Notification - ProcessDevicePushNotificationRequestsAsync - wns - Success");
@@ -209,7 +229,7 @@ public class PushNotificationHelper : IPushNotificationHelper
 
                         case "apns":
                             // iOS
-                            NotificationOutcome apnsOutcome = await _hub.SendAppleNativeNotificationAsync(payload, notificationItem.To + notificationType);
+                            NotificationOutcome apnsOutcome = await _hub.SendAppleNativeNotificationAsync(payload, new[] { deviceTag });
 
                             // Log success
                             logData.EventDetails.Modify(Constant.AppAction, "Notification - ProcessDevicePushNotificationRequestsAsync - apns - Success");
@@ -222,7 +242,7 @@ public class PushNotificationHelper : IPushNotificationHelper
 
                         case "fcm":
                             // Android
-                            NotificationOutcome fcmOutcome = await _hub.SendFcmNativeNotificationAsync(payload, notificationItem.To + notificationType);
+                            NotificationOutcome fcmOutcome = await _hub.SendFcmNativeNotificationAsync(payload, new[] { deviceTag });
 
                             // Log success
                             logData.EventDetails.Modify(Constant.AppAction, "Notification - ProcessDevicePushNotificationRequestsAsync - fcm - Success");
@@ -255,5 +275,17 @@ public class PushNotificationHelper : IPushNotificationHelper
             _logger.LogInformation(new EventId((int)EventIds.SendDevicePushNotificationCompleted),
                 "Notification - ProcessDevicePushNotificationRequestsAsync - Complete");
         }
+    }
+
+    /// <summary>
+    /// Check if the notification target alias is valid
+    /// </summary>
+    /// <param name="to">The notification target alias.</param>
+    /// <returns>True if the notification target alias is valid, otherwise false.</returns>
+    private static bool IsValidNotificationTarget(string to)
+    {
+        return !string.IsNullOrWhiteSpace(to)
+            && !InvalidTagExpressionCharactersRegex.IsMatch(to)
+            && NotificationToRegex.IsMatch(to);
     }
 }

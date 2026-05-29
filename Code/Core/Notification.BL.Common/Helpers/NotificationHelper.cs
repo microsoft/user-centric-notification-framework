@@ -5,6 +5,8 @@ namespace Notification.BL.Common.Helpers
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Net;
     using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
@@ -64,7 +66,7 @@ namespace Notification.BL.Common.Helpers
         public async Task<NotificationResponse> BroadcastNotificationsToProviders(NotificationItem item)
         {
             bool isSucccessfullySent;
-            Dictionary<string, string> failedQueuesInformation;
+            Dictionary<string, string> failedQueuesInformation = new Dictionary<string, string>();
             List<string> queueNames = new List<string>();
 
             foreach (var notificationItem in item.NotificationTypes)
@@ -92,7 +94,32 @@ namespace Notification.BL.Common.Helpers
                         break;
 
                     case NotificationType.Cancel:
-                        (isSucccessfullySent, failedQueuesInformation) = await CancelScheduledMessageAsync(Constant.ReminderQueueName, item);
+                        if (!string.IsNullOrWhiteSpace(item.Id))
+                        {
+                            var notificationStatusItems = _tableStorageHelper.GetTableEntityListByPartitionKey<NotificationStatus>(Constant.NotificationStatusTableName, item.Id);
+                            if (notificationStatusItems?.Count > 0)
+                            {
+                                var cancellationTasks = notificationStatusItems
+                                    .Where(statusItem => !string.IsNullOrWhiteSpace(statusItem.ScheduledSequenceNumberJson))
+                                    .Select(statusItem => JsonConvert.DeserializeObject<Dictionary<string, long>>(statusItem.ScheduledSequenceNumberJson))
+                                    .Where(sequenceNumbers => sequenceNumbers?.Count > 0)
+                                    .SelectMany(sequenceNumbers => sequenceNumbers.Select(kvp =>
+                                        CancelScheduledMessageAsync(kvp.Key, item, kvp.Value)))
+                                    .ToList();
+
+                                if (cancellationTasks.Count > 0)
+                                {
+                                    var results = await Task.WhenAll(cancellationTasks);
+
+                                    // Aggregate results
+                                    isSucccessfullySent = results.All(r => r.IsSuccess);
+                                    failedQueuesInformation = results
+                                        .SelectMany(r => r.FailedQueuesInformation)
+                                        .GroupBy(kvp => kvp.Key)
+                                        .ToDictionary(g => g.Key, g => g.First().Value);
+                                }
+                            }
+                        }
                         break;
                 }
             }
@@ -113,6 +140,21 @@ namespace Notification.BL.Common.Helpers
         {
             string output = templateContent;
             string data = Convert.ToString(templateData);
+            Dictionary<string, string> encodedTemplateData = null;
+
+            if (!string.IsNullOrWhiteSpace(data))
+            {
+                encodedTemplateData = JsonConvert.DeserializeObject<Dictionary<string, string>>(data)
+                    ?.ToDictionary(
+                        item => item.Key,
+                        item => WebUtility.HtmlEncode(item.Value ?? string.Empty));
+
+                if (encodedTemplateData != null)
+                {
+                    data = JsonConvert.SerializeObject(encodedTemplateData);
+                }
+            }
+
             if (null != notificationTypes)
             {
                 foreach (NotificationType notificationType in notificationTypes)
@@ -134,9 +176,9 @@ namespace Notification.BL.Common.Helpers
                 }
             }
 
-            if (data != null && output != null)
+            if (encodedTemplateData != null && output != null)
             {
-                foreach (KeyValuePair<string, string> replaceable in JsonConvert.DeserializeObject<Dictionary<string, string>>(data))
+                foreach (KeyValuePair<string, string> replaceable in encodedTemplateData)
                 {
                     output = output.Replace("#" + replaceable.Key + "#", replaceable.Value);
                 }
@@ -167,7 +209,7 @@ namespace Notification.BL.Common.Helpers
             {
                 logData.EventDetails.Modify(Constant.Xcv, $"{status.PartitionKey}");
 
-                return await _tableStorageHelper.Insert(tableName, status);
+                return await _tableStorageHelper.InsertOrReplace(tableName, status);
             }
             catch (Exception ex)
             {
@@ -185,6 +227,35 @@ namespace Notification.BL.Common.Helpers
         #endregion Public Methods
 
         #region Private Methods
+
+        /// <summary>
+        /// To update the status in Azure notification status table for scheduled messages
+        /// </summary>
+        /// <param name="isSucccessfullySent"></param>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        private async Task UpdateScheduledStatusInTable(bool isSucccessfullySent, NotificationItem item, string queue)
+        {
+            if (isSucccessfullySent)
+            {
+                var scheduledEmailStatus = new NotificationStatus
+                {
+                    PartitionKey = item.Id,
+                    RowKey = item.Telemetry?.MessageId ?? item.Id,
+                    TenantIdentifier = item.TenantIdentifier,
+                    MessageId = item.Telemetry?.MessageId,
+                    Xcv = item.Telemetry?.Xcv,
+                    ActionResult = true,
+                    SequenceNumber = 0,
+                    ScheduledSequenceNumberJson = JsonConvert.SerializeObject(new Dictionary<string, long>()
+                    {
+                        { queue, item.SequenceNumber }
+                    })
+                };
+
+                await _tableStorageHelper.InsertOrReplace(Constant.NotificationStatusTableName, scheduledEmailStatus);
+            }
+        }
 
         /// <summary>
         /// Pushes the message to each of the service bus queue
@@ -238,6 +309,14 @@ namespace Notification.BL.Common.Helpers
                     foreach (var queue in queueNames)
                     {
                         (isSucccessfullySent, item.SequenceNumber) = await SendMessage(failedQueuesInformation, logData, message, queue);
+
+                        // To handle scheduled email message
+                        if ((queue.Equals(_config[Constant.MailQueueName], StringComparison.InvariantCultureIgnoreCase)
+                            || queue.Equals(Constant.ReminderQueueName, StringComparison.InvariantCultureIgnoreCase))
+                            && item.SequenceNumber > 0)
+                        {
+                            await UpdateScheduledStatusInTable(isSucccessfullySent, item, queue);
+                        }
                     }
 
                     // Add to reminder queue if reminder notifications are applicable
@@ -245,6 +324,10 @@ namespace Notification.BL.Common.Helpers
                     {
                         message.ScheduledEnqueueTime = item.Reminder.NextReminderDate;
                         (isSucccessfullySent, item.SequenceNumber) = await SendMessage(failedQueuesInformation, logData, message, Constant.ReminderQueueName);
+                        if (item.SequenceNumber > 0)
+                        {
+                            await UpdateScheduledStatusInTable(isSucccessfullySent, item, Constant.ReminderQueueName);
+                        }
                     }
                     else
                     {
@@ -289,7 +372,7 @@ namespace Notification.BL.Common.Helpers
         /// <param name="queue"></param>
         /// <param name="item"></param>
         /// <returns></returns>
-        private async Task<(bool IsSuccess, Dictionary<string, string> FailedQueuesInformation)> CancelScheduledMessageAsync(string queue, NotificationItem item)
+        private async Task<(bool IsSuccess, Dictionary<string, string> FailedQueuesInformation)> CancelScheduledMessageAsync(string queue, NotificationItem item, long sequenceNumber)
         {
             bool isSucccessfullySent = true;
             Dictionary<string, string> failedQueuesInformation = new Dictionary<string, string>();
@@ -312,10 +395,10 @@ namespace Notification.BL.Common.Helpers
             {
                 await _syncObject.WaitAsync();
 
-                if (item.SequenceNumber > 0)
+                if (sequenceNumber > 0)
                 {
                     // Cancel sending the scheduled message to the queue
-                    await _serviceBusClient.CreateSender(queue).CancelScheduledMessageAsync(item.SequenceNumber);
+                    await _serviceBusClient.CreateSender(queue).CancelScheduledMessageAsync(sequenceNumber);
                 }
             }
             catch (Exception ex)

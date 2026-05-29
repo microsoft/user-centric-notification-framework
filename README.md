@@ -193,8 +193,46 @@ Once all the components are deployed, go to the below components, copy the acces
         Use 'IdentityProviderResource' value
     
     > appid
-    
+
         Use 'ManagedIdentityClientId' value
+
+#### Service Bus RBAC Role Assignments
+
+Each Function App uses Managed Identity to connect to Azure Service Bus. The following roles must be assigned on the Service Bus namespace (or individual queues) for each Function App's managed identity:
+
+| Function App | Role | Queue (App Setting) | Direction |
+|---|---|---|---|
+| **Notification Common Services** | Azure Service Bus Data Sender | `MailQueueName` | Sends email notifications |
+| | Azure Service Bus Data Sender | `DevicePushQueueName` | Sends device push notifications |
+| | Azure Service Bus Data Sender | `WebPushQueueName` | Sends web push notifications |
+| | Azure Service Bus Data Sender | `TextQueueName` | Sends text notifications |
+| | Azure Service Bus Data Sender | `ReminderQueueName` | Schedules/cancels reminder messages |
+| **Send Email Function App** | Azure Service Bus Data Receiver | `MailQueueName` | Receives email notifications |
+| **Send Reminder Function App** | Azure Service Bus Data Receiver | `ReminderQueueName` | Receives reminder notifications |
+| **Send Push Function App** | Azure Service Bus Data Receiver | `DevicePushQueueName` | Receives device push notifications |
+| | Azure Service Bus Data Receiver | `WebPushQueueName` | Receives web push notifications |
+| **Send Text Function App** | Azure Service Bus Data Receiver | `TextQueueName` | Receives text notifications |
+
+> **Note:** The *GetEmailNotificationStatus* Function App and *Notification Service API* do not require any Service Bus roles (they use Timer Trigger and HTTP respectively).
+
+#### Storage Account RBAC Role Assignments
+
+Each Function App and API uses Managed Identity to connect to Azure Storage. The following roles must be assigned on the Storage Account for each app's managed identity:
+
+| Function App / API | Storage Blob Data Contributor | Storage Blob Data Reader | Storage Table Data Contributor |
+|---|---|---|---|
+| **Notification Common Services** |✅ | | ✅ |
+| **Send Email Function App** |✅ | |✅ |
+| **Send Reminder Function App** |✅ | |✅ |
+| **Send Push Function App** | | | |
+| **Send Text Function App** | | | |
+| **Send Custom Notification** | | | |
+| **GetEmailNotificationStatus** |✅ | |✅|
+| **Notification Service API** | | | |
+
+- **Blob Data Contributor** is needed by Common Services because it **uploads** compressed notification payloads to blob storage before sending a Service Bus message reference.
+- **Blob Data Reader** is needed by the consumer Function Apps because they **download** the payload from blob storage when processing messages.
+- **Table Data Contributor** is needed by apps that read/write notification templates, notification status logs, push notification registrations, or scheduled message tracking in Azure Table Storage. Common Services uses it to persist and look up reminder sequence numbers for cancellation support.
 
 ## Local Setup
 Configure the following package sources in VS to restore NuGet packages:
@@ -214,6 +252,10 @@ If the issue persists, add the following AppSettings in the service configuratio
 ## How to Setup to use this framework
 
 See the [SETUP.md](SETUP.md) file for details
+
+## How to use Notifications
+
+See the [NOTIFICATION_GUIDE.md](NOTIFICATION_GUIDE.md) for details on sending emails, scheduling notifications, setting up reminders, and cancellation
 
 ## Authors
 

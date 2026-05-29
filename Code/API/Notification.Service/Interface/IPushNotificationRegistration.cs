@@ -8,13 +8,17 @@ using System.Threading.Tasks;
 using Contract;
 using Microsoft.Azure.NotificationHubs;
 
+/// <summary>
+/// Defines operations for managing push notification registrations in a notification hub.
+/// </summary>
 public interface IPushNotificationRegistration
 {
     /// <summary>
     /// Gets the push registration info
     /// </summary>
+    /// <param name="alias">Alias of the user</param>
     /// <returns>Returns the registration info if for the given user</returns>
-    Task<List<RegistrationDescription>> GetRegistrationInfo();
+    Task<List<RegistrationDescription>> GetRegistrationInfo(string alias);
 
     /// <summary>
     /// Creates the push registration id
@@ -34,7 +38,8 @@ public interface IPushNotificationRegistration
     /// <summary>
     /// Deletes the push registration entry in notification hub for the user/device combination
     /// </summary>
+    /// <param name="alias">Alias of the user</param>
     /// <param name="id">the registration id</param>
     /// <returns></returns>
-    Task DeleteRegistration(string id);
+    Task DeleteRegistration(string alias, string id);
 }
