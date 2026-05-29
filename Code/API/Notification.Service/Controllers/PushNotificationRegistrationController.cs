@@ -62,7 +62,7 @@ public class PushNotificationRegistrationController : BaseController
             }
 
             // Get registration
-            var registrations = await _pushNotificationRegistration.GetRegistrationInfo();
+            var registrations = await _pushNotificationRegistration.GetRegistrationInfo(Alias);
 
             // Log Success
             logData.EventDetails.Modify(Constant.AppAction, "Notification - Registration - Device Push - GET - Success");

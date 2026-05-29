@@ -3,6 +3,7 @@
 
 namespace Notification.Services.Helpers;
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -25,6 +26,10 @@ public class PushNotificationRegistrationHelper : IPushNotificationRegistration
     private readonly IConfiguration _config;
     private readonly NotificationHubClient _hub;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PushNotificationRegistrationHelper"/> class.
+    /// </summary>
+    /// <param name="config">The configuration containing notification hub connection settings.</param>
     public PushNotificationRegistrationHelper(IConfiguration config)
     {
         _config = config;
@@ -37,9 +42,10 @@ public class PushNotificationRegistrationHelper : IPushNotificationRegistration
     /// Gets the push registration info
     /// </summary>
     /// <returns>Returns the registration info if for the given user</returns>
-    public async Task<List<RegistrationDescription>> GetRegistrationInfo()
+    public async Task<List<RegistrationDescription>> GetRegistrationInfo(string alias)
     {
-        return (await _hub.GetAllRegistrationsAsync(0)).ToList();
+        string aliasTagPrefix = CreateAliasTagPrefix(alias);
+        return (await _hub.GetRegistrationsByTagAsync(aliasTagPrefix, 100)).ToList();
     }
 
     /// <summary>
@@ -106,8 +112,8 @@ public class PushNotificationRegistrationHelper : IPushNotificationRegistration
         // This insures that this registration is only for the currently signed in user's alias
         // The tag could contain anything else but that doesn't matter. The important thing is that it is of the form
         // [currentUsersAlias]_[type] and not [someOtherAlias]_[type] and this is an easy flexable way to test that
-        string aliasTagPrefix = string.Create(CultureInfo.InvariantCulture, $"{alias}_");
-        if (registrationInfo.Tags.Any(tag => !tag.StartsWith(aliasTagPrefix, System.StringComparison.OrdinalIgnoreCase)))
+        string aliasTagPrefix = CreateAliasTagPrefix(alias);
+        if (registrationInfo.Tags.Any(tag => !tag.StartsWith(aliasTagPrefix, StringComparison.OrdinalIgnoreCase)))
         {
             throw new InvalidDataException();
         }
@@ -172,10 +178,20 @@ public class PushNotificationRegistrationHelper : IPushNotificationRegistration
             throw new InvalidDataException();
         }
 
-        string aliasTagPrefix = string.Create(CultureInfo.InvariantCulture, $"{alias}_");
-        if (!existingRegistration.Tags.Any(tag => tag.StartsWith(aliasTagPrefix, System.StringComparison.OrdinalIgnoreCase)))
+        string aliasTagPrefix = CreateAliasTagPrefix(alias);
+        if (!existingRegistration.Tags.Any(tag => tag.StartsWith(aliasTagPrefix, StringComparison.OrdinalIgnoreCase)))
         {
             throw new InvalidDataException();
         }
+    }
+
+    /// <summary>
+    /// Creates a tag prefix by appending an underscore to the alias.
+    /// </summary>
+    /// <param name="alias">The alias to use as the base of the prefix.</param>
+    /// <returns>A string containing the alias followed by an underscore.</returns>
+    private static string CreateAliasTagPrefix(string alias)
+    {
+        return string.Create(CultureInfo.InvariantCulture, $"{alias}_");
     }
 }

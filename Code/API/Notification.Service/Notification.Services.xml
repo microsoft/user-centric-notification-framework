@@ -53,7 +53,13 @@
             Helper class to Create/Update/Delete push registration entry in notificationn hub
             </summary>
         </member>
-        <member name="M:Notification.Services.Helpers.PushNotificationRegistrationHelper.GetRegistrationInfo">
+        <member name="M:Notification.Services.Helpers.PushNotificationRegistrationHelper.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Notification.Services.Helpers.PushNotificationRegistrationHelper"/> class.
+            </summary>
+            <param name="config">The configuration containing notification hub connection settings.</param>
+        </member>
+        <member name="M:Notification.Services.Helpers.PushNotificationRegistrationHelper.GetRegistrationInfo(System.String)">
             <summary>
             Gets the push registration info
             </summary>
@@ -97,6 +103,13 @@
             <returns></returns>
             <exception cref="T:System.IO.InvalidDataException"></exception>
         </member>
+        <member name="M:Notification.Services.Helpers.PushNotificationRegistrationHelper.CreateAliasTagPrefix(System.String)">
+            <summary>
+            Creates a tag prefix by appending an underscore to the alias.
+            </summary>
+            <param name="alias">The alias to use as the base of the prefix.</param>
+            <returns>A string containing the alias followed by an underscore.</returns>
+        </member>
         <member name="T:Notification.Services.Helpers.WebPushNotificationRegistrationHelper">
             <summary>
             Helper class to Create/Update/Delete Web push registration entry in database
@@ -132,10 +145,16 @@
             <param name="registrationInfo">Registration details like browser/endpoint configuration</param>
             <returns></returns>
         </member>
-        <member name="M:Notification.Services.Interface.IPushNotificationRegistration.GetRegistrationInfo">
+        <member name="T:Notification.Services.Interface.IPushNotificationRegistration">
+            <summary>
+            Defines operations for managing push notification registrations in a notification hub.
+            </summary>
+        </member>
+        <member name="M:Notification.Services.Interface.IPushNotificationRegistration.GetRegistrationInfo(System.String)">
             <summary>
             Gets the push registration info
             </summary>
+            <param name="alias">Alias of the user</param>
             <returns>Returns the registration info if for the given user</returns>
         </member>
         <member name="M:Notification.Services.Interface.IPushNotificationRegistration.CreateRegistrationId(System.String)">
