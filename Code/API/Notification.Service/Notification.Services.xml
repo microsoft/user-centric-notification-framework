@@ -74,10 +74,11 @@
             <param name="registrationInfo"></param>
             <returns>Returns all active registrations for the user</returns>
         </member>
-        <member name="M:Notification.Services.Helpers.PushNotificationRegistrationHelper.DeleteRegistration(System.String)">
+        <member name="M:Notification.Services.Helpers.PushNotificationRegistrationHelper.DeleteRegistration(System.String,System.String)">
             <summary>
             Deletes the push registration entry in notification hub for the user/device combination
             </summary>
+            <param name="alias">Alias of the user</param>
             <param name="id">the registration id</param>
             <returns></returns>
         </member>
@@ -86,6 +87,15 @@
             Checks if the exception has an internal response code of HttpStatusCode.Gone then throw a new HttpRequestException with HttpStatusCode as Gone
             </summary>
             <param name="e"></param>
+        </member>
+        <member name="M:Notification.Services.Helpers.PushNotificationRegistrationHelper.ValidateRegistrationOwnership(System.String,System.String)">
+            <summary>
+            Validates that the registration id belongs to the user alias by checking the tags of the registration entry in notification hub. If the registration doesn't exist or doesn't belong to the user then an exception is thrown
+            </summary>
+            <param name="alias">Alias of the user</param>
+            <param name="registrationId">The registration id</param>
+            <returns></returns>
+            <exception cref="T:System.IO.InvalidDataException"></exception>
         </member>
         <member name="T:Notification.Services.Helpers.WebPushNotificationRegistrationHelper">
             <summary>
@@ -143,10 +153,11 @@
             <param name="registrationInfo">Registration details like endpoint configuration</param>
             <returns></returns>
         </member>
-        <member name="M:Notification.Services.Interface.IPushNotificationRegistration.DeleteRegistration(System.String)">
+        <member name="M:Notification.Services.Interface.IPushNotificationRegistration.DeleteRegistration(System.String,System.String)">
             <summary>
             Deletes the push registration entry in notification hub for the user/device combination
             </summary>
+            <param name="alias">Alias of the user</param>
             <param name="id">the registration id</param>
             <returns></returns>
         </member>

@@ -34,7 +34,8 @@ public interface IPushNotificationRegistration
     /// <summary>
     /// Deletes the push registration entry in notification hub for the user/device combination
     /// </summary>
+    /// <param name="alias">Alias of the user</param>
     /// <param name="id">the registration id</param>
     /// <returns></returns>
-    Task DeleteRegistration(string id);
+    Task DeleteRegistration(string alias, string id);
 }

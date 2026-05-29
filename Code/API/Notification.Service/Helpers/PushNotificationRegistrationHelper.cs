@@ -4,6 +4,7 @@
 namespace Notification.Services.Helpers;
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -105,10 +106,13 @@ public class PushNotificationRegistrationHelper : IPushNotificationRegistration
         // This insures that this registration is only for the currently signed in user's alias
         // The tag could contain anything else but that doesn't matter. The important thing is that it is of the form
         // [currentUsersAlias]_[type] and not [someOtherAlias]_[type] and this is an easy flexable way to test that
-        if (registrationInfo.Tags.Any(tag => !tag.Contains(alias)))
+        string aliasTagPrefix = string.Create(CultureInfo.InvariantCulture, $"{alias}_");
+        if (registrationInfo.Tags.Any(tag => !tag.StartsWith(aliasTagPrefix, System.StringComparison.OrdinalIgnoreCase)))
         {
             throw new InvalidDataException();
         }
+
+        await ValidateRegistrationOwnership(alias, registrationInfo.Id);
 
         registration.RegistrationId = registrationInfo.Id;
         registration.Tags = new HashSet<string>(registrationInfo.Tags);
@@ -126,10 +130,12 @@ public class PushNotificationRegistrationHelper : IPushNotificationRegistration
     /// <summary>
     /// Deletes the push registration entry in notification hub for the user/device combination
     /// </summary>
+    /// <param name="alias">Alias of the user</param>
     /// <param name="id">the registration id</param>
     /// <returns></returns>
-    public async Task DeleteRegistration(string id)
+    public async Task DeleteRegistration(string alias, string id)
     {
+        await ValidateRegistrationOwnership(alias, id);
         await _hub.DeleteRegistrationAsync(id);
     }
 
@@ -148,6 +154,28 @@ public class PushNotificationRegistrationHelper : IPushNotificationRegistration
             {
                 throw new HttpRequestException(HttpStatusCode.Gone.ToString());
             }
+        }
+    }
+
+    /// <summary>
+    /// Validates that the registration id belongs to the user alias by checking the tags of the registration entry in notification hub. If the registration doesn't exist or doesn't belong to the user then an exception is thrown
+    /// </summary>
+    /// <param name="alias">Alias of the user</param>
+    /// <param name="registrationId">The registration id</param>
+    /// <returns></returns>
+    /// <exception cref="InvalidDataException"></exception>
+    private async Task ValidateRegistrationOwnership(string alias, string registrationId)
+    {
+        var existingRegistration = await _hub.GetRegistrationAsync<RegistrationDescription>(registrationId);
+        if (existingRegistration?.Tags == null)
+        {
+            throw new InvalidDataException();
+        }
+
+        string aliasTagPrefix = string.Create(CultureInfo.InvariantCulture, $"{alias}_");
+        if (!existingRegistration.Tags.Any(tag => tag.StartsWith(aliasTagPrefix, System.StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new InvalidDataException();
         }
     }
 }

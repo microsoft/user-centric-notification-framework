@@ -66,6 +66,13 @@ public class AuthorizationMiddleware : IMiddleware
 
             #endregion Check for Valid AppID
         }
+        else
+        {
+            // If the request doesn't have the required headers added by App Service Authentication (EasyAuth) then return UnAuthorized Response
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await context.Response.WriteAsync("Unauthorized request");
+            return;
+        }
 
         await next(context);
     }
