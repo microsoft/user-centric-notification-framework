@@ -39,7 +39,7 @@ public class SendRemindersNotification
     }
 
     [FunctionName("SendReminderNotification")]
-    public async Task Run([ServiceBusTrigger("%ReminderQueueName%", Connection = "ServiceBusNamespace")] ServiceBusMessage message, ILogger logger)
+    public async Task Run([ServiceBusTrigger("%ReminderQueueName%", Connection = "ServiceBusNamespace")] ServiceBusReceivedMessage message, ILogger logger)
     {
         LogData logData = new LogData()
         {

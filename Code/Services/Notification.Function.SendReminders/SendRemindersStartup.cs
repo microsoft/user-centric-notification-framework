@@ -88,6 +88,7 @@ public class SendRemindersStartup : FunctionsStartup
         var client = new BlobServiceClient(
                         new Uri($"https://" + config?[Constant.StorageAccountName] + ".blob.core.windows.net/"),
                         azureCredential);
+        builder.Services.AddScoped<INotificationHelper, NotificationHelper>();
         builder.Services.AddScoped<IReminderNotificationHelper, ReminderNotificationHelper>();
         builder.Services.AddScoped<IUtilityHelper, UtilityHelper>();
         builder.Services.AddSingleton<IPerformanceLogger, PerformanceLogger>();

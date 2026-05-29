@@ -21,5 +21,8 @@ namespace Notification.Contract
 
         [JsonProperty("sequenceNumber")]
         public long SequenceNumber { get; set; }
+
+        [JsonProperty("scheduledSequenceNumberJson")]
+        public string ScheduledSequenceNumberJson { get; set; } = string.Empty;
     }
 }

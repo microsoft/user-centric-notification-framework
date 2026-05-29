@@ -199,3 +199,4 @@ ModelManifest.xml
 /Infrastructure/pipelines/
 /.pipelines
 /NuGet.config
+/es-metadata.yml

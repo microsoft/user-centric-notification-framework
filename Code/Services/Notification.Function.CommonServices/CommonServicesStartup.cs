@@ -89,6 +89,7 @@ public class CommonServicesStartup : FunctionsStartup
         var client = new BlobServiceClient(
                         new Uri($"https://" + config?[Constant.StorageAccountName] + ".blob.core.windows.net/"),
                         azureCredential);
+        builder.Services.AddSingleton<ITableHelper, TableHelper>((provider) => { return new TableHelper(config[Constant.StorageAccountName], azureCredential); });
         builder.Services.AddSingleton<INotificationHelper, NotificationHelper>();
         builder.Services.AddSingleton<IUtilityHelper, UtilityHelper>();
         builder.Services.AddSingleton<IPerformanceLogger, PerformanceLogger>();
