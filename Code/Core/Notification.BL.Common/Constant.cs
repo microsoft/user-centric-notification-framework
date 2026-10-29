@@ -10,6 +10,7 @@ namespace Notification.BL.Common
         public const string AzureAppConfigurationUrl = "AzureAppConfigurationUrl";
         public const string ServiceBusNamespace = "ServiceBusNamespace:fullyQualifiedNamespace";
         public const string StorageAccountName = "StorageAccountName";
+        public const string AttachmentsBlobContainerName = "AttachmentsBlobContainerName";
         public const string ApplicationInsightsConnectionString = "APPLICATIONINSIGHTS_CONNECTION_STRING";
         public const string SendEmailWebhookEndpoint = "SendEmailWebhookEndpoint";
         public const string SendTextWebhookEndpoint = "SendTextWebhookEndpoint";

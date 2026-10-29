@@ -28,6 +28,8 @@ namespace Notification.BL.SendEmail.Helpers
         private readonly IHttpHelper _httpHelper;
         private readonly ILogger _logger;
         private readonly string _functionUrl;
+        private readonly string _allowedStorageHost;
+        private readonly string _allowedBlobContainerName;
 
         public EmailNotificationHelper(INotificationHelper notificationHelper, IBlobStorageHelper blobStorageHelper, IConfiguration config, IHttpHelper httpHelper, ILogger<NotificationHelper> logger)
         {
@@ -36,6 +38,12 @@ namespace Notification.BL.SendEmail.Helpers
             _httpHelper = httpHelper;
             _logger = logger;
             _functionUrl = config[Constant.SendEmailWebhookEndpoint];
+            _allowedStorageHost = $"{config[Constant.StorageAccountName]}.blob.core.windows.net";
+            // Falls back to the internal "attachments" container name if not overridden in App Configuration.
+            var configuredContainerName = config[Constant.AttachmentsBlobContainerName];
+            _allowedBlobContainerName = string.IsNullOrWhiteSpace(configuredContainerName)
+                ? Constant.AttachmentsBlobContainer
+                : configuredContainerName;
         }
 
         /// <summary>
@@ -81,7 +89,22 @@ namespace Notification.BL.SendEmail.Helpers
                         {
                             // Assumption:: All the urls would be blob urls
                             BlobUriBuilder blobUriBuilder = new BlobUriBuilder(new Uri(attachment.FileUrl));
+                            if (!string.Equals(blobUriBuilder.Host, _allowedStorageHost, StringComparison.OrdinalIgnoreCase)
+                                || !string.Equals(blobUriBuilder.BlobContainerName, _allowedBlobContainerName, StringComparison.Ordinal)
+                                || string.IsNullOrWhiteSpace(blobUriBuilder.BlobName))
+                            {
+                                throw new UnauthorizedAccessException("Attachment FileUrl does not resolve to an allowed blob location.");
+                            }
+
                             attachment.FileBase64 = Convert.ToBase64String(await _blobStorageHelper.DownloadByteArray(blobUriBuilder.BlobContainerName, blobUriBuilder.BlobName));
+
+                            // Rebuild FileUrl from validated parts only, so no caller-supplied data is forwarded downstream.
+                            BlobUriBuilder canonicalUriBuilder = new BlobUriBuilder(new Uri($"https://{_allowedStorageHost}"))
+                            {
+                                BlobContainerName = _allowedBlobContainerName,
+                                BlobName = blobUriBuilder.BlobName
+                            };
+                            attachment.FileUrl = canonicalUriBuilder.ToUri().ToString();
                         }
                     }
                     catch (Exception ex)
