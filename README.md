@@ -119,6 +119,7 @@ Once all the components are deployed, go to the below components, copy the acces
 | AzureAppConfigurationUrl | Azure App Configuration | No | Common |
 | ServiceBusNamespace | ServiceBus | No | Common |
 | StorageAccountName | Storage Account | No | Common |
+| AttachmentsBlobContainerName | Storage Blob Container Name *(defaults to `attachments` if not set)* | No | Email |
 | ApplicationInsightsConnectionString | Application Insights | No | Common |
 | APPINSIGHTS_INSTRUMENTATIONKEY | Application Insights | No | Common |
 | SendEmailWebhookEndpoint | LogicApp - Send Email (without SAS Token) | No | Email |
